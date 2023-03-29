@@ -39,7 +39,8 @@ if __name__ == '__main__':
             messages.append({'role': 'user', 'content': prompt})
             response: Generator = openai.ChatCompletion.create(model=model, stream=True,
                                                                messages=messages,
-                                                               temperature=0.7)
+                                                               temperature=0.7,
+                                                               max_tokens=1000)
             full_response = []
             for chunk in response:
                 for choice in chunk['choices']:
