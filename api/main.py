@@ -13,16 +13,8 @@ openai.api_key = CONFIG['lapetusAPIkey']
 model = 'gpt-4'
 
 # TODO:
-#   - implement chat functionality:
-# openai.ChatCompletion.create(
-#   model="gpt-3.5-turbo",
-#   messages=[
-#         {"role": "system", "content": "You are a helpful assistant."},
-#         {"role": "user", "content": "Who won the world series in 2020?"},
-#         {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
-#         {"role": "user", "content": "Where was it played?"}
-#     ]
-# )
+#   - get abs path of this file to find json when pwd is anywhere
+
 
 system_message = {'role': 'system', 'content': 'You are a concise assistant to software engineers'}
 
