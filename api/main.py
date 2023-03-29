@@ -9,7 +9,7 @@ from terminal import *
 
 max_text_width = max_text_width(get_terminal_size().columns)
 
-openai.api_key = CONFIG['apiKey2']
+openai.api_key = CONFIG['lapetusAPIkey']
 model = 'gpt-3.5-turbo'
 
 # todo log and output to a file the sum of tokens used
