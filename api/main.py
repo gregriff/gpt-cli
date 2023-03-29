@@ -1,6 +1,6 @@
 import openai
-import requests
-from configuration.config import CONFIG
+
+from config import CONFIG
 
 openai.api_key = CONFIG['apiKey2']
 model = 'gpt-3.5-turbo'
