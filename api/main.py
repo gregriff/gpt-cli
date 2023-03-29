@@ -18,7 +18,10 @@ model = 'gpt-3.5-turbo'
 if __name__ == '__main__':
     greeting(model)
     while True:
-        prompt = input(f'{BOLD + YELLOW}? {CYAN}> ')
+        try:
+            prompt = input(f'{BOLD + YELLOW}? {CYAN}> ')
+        except KeyboardInterrupt:
+            exit(0)
         if prompt in ('exit', 'e', 'q', 'quit'):
             exit(0)
         print(RESET, GREEN)
