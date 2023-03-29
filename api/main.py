@@ -1,4 +1,5 @@
 import sys
+from textwrap import TextWrapper
 from typing import Generator
 from shutil import get_terminal_size
 
@@ -10,7 +11,7 @@ from terminal import *
 max_text_width = max_text_width(get_terminal_size().columns)
 
 openai.api_key = CONFIG['lapetusAPIkey']
-model = 'gpt-4'
+model = 'gpt-3.5-turbo'
 
 # TODO:
 #   - get abs path of this file to find json when pwd is anywhere
@@ -42,14 +43,18 @@ if __name__ == '__main__':
                                                                temperature=0.7,
                                                                max_tokens=1000)
             full_response = []
+            tw = TextWrapper(width=max_text_width)
             for chunk in response:
                 for choice in chunk['choices']:
                     text_part = choice['delta'].get('content', '')
                     full_response.append(text_part)
-                    print(text_part, end='')
+                    # print(tw.fill(text_part), end='')
                 # text_part: dict = chunk['choices'][0]['delta']
                 # content: str = text_part.get('content', '')
                 # print(content, end='')
-            print('\n')
+            s = ''.join(full_response)
+            print(tw.fill(s), '\n')
+
+            # print('\n')
             messages.append({"role": "assistant", "content": ''.join(full_response)})
             count += 1

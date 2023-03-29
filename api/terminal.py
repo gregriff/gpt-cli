@@ -20,4 +20,5 @@ def greeting(model):
 
 
 def max_text_width(term_size_columns: int):
-    return int(term_size_columns / 2) if term_size_columns > 80 else int(term_size_columns)
+    # return int(term_size_columns / 2) if term_size_columns > 65 else int(term_size_columns)
+    return max(60, term_size_columns//2)
