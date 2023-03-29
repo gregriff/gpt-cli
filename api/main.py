@@ -1,3 +1,6 @@
+from typing import Generator
+import asyncio
+
 import openai
 
 from config import CONFIG
@@ -5,9 +8,7 @@ from config import CONFIG
 openai.api_key = CONFIG['apiKey2']
 model = 'gpt-3.5-turbo'
 
-
-def parse_completion(compl: dict) -> str:
-    return compl['choices'][0]['message']['content']
+# todo log and output to a file the sum of tokens used
 
 
 if __name__ == '__main__':
@@ -15,6 +16,11 @@ if __name__ == '__main__':
         prompt = input('> ')
         if prompt in ('exit', 'e', 'q', 'quit'):
             exit(0)
-        completion = openai.ChatCompletion.create(model=model, messages=[{'role': 'user', 'content': prompt}])
-        response = parse_completion(completion)
-        print(response)
+        response: Generator = openai.ChatCompletion.create(model=model, stream=True,
+                                                           messages=[{'role': 'user', 'content': prompt}],
+                                                           temperature=0.7)
+        for chunk in response:
+            text_part: dict = chunk['choices'][0]['delta']
+            content: str = text_part.get('content', '')
+            print(content, end='')
+        print('\n')
