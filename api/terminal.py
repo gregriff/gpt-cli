@@ -12,7 +12,8 @@ REVERSE = "\033[;7m"
 
 
 def greeting(model):
-    print(CYAN, '\n', '=*=' * 10, ORANGE)
+    print(CYAN)
+    print('=*=' * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
     print(f'{"model" : <10}{model : <15}', RESET + CYAN)
     print('=*=' * 10, end='\n\n')
