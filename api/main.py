@@ -11,10 +11,15 @@ from terminal import *
 max_text_width = max_text_width(get_terminal_size().columns)
 
 openai.api_key = CONFIG['lapetusAPIkey']
-model = 'gpt-3.5-turbo'
+model = 'gpt-4'
 
 # TODO:
 #   - get abs path of this file to find json when pwd is anywhere
+#       (sys.path.extend()???)
+#   - type sys to print system message, sys=__ to change it
+#   - wrap text
+#   - send GET Model Request and display success message
+#   - rewrite using requests library
 
 
 system_message = {'role': 'system', 'content': 'You are a concise assistant to software engineers'}
@@ -43,18 +48,17 @@ if __name__ == '__main__':
                                                                temperature=0.7,
                                                                max_tokens=1000)
             full_response = []
-            tw = TextWrapper(width=max_text_width)
+            # tw = TextWrapper(width=max_text_width)
             for chunk in response:
                 for choice in chunk['choices']:
                     text_part = choice['delta'].get('content', '')
                     full_response.append(text_part)
-                    # print(tw.fill(text_part), end='')
+                    print(text_part, end='')
                 # text_part: dict = chunk['choices'][0]['delta']
                 # content: str = text_part.get('content', '')
                 # print(content, end='')
-            s = ''.join(full_response)
-            print(tw.fill(s), '\n')
-
-            # print('\n')
+            # print(''.join(full_response))
+            # print(tw.fill(s), '\n')
+            print('\n')
             messages.append({"role": "assistant", "content": ''.join(full_response)})
             count += 1
