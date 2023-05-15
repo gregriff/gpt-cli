@@ -13,16 +13,9 @@ max_text_width = max_text_width(get_terminal_size().columns)
 openai.api_key = CONFIG['lapetusAPIkey']
 model = 'gpt-4'
 
-# TODO:
-#   - get abs path of this file to find json when pwd is anywhere
-#       (sys.path.extend()???)
-#   - type sys to print system message, sys=__ to change it
-#   - wrap text
-#   - send GET Model Request and display success message
-#   - rewrite using requests library
 
-
-system_message = {'role': 'system', 'content': 'You are a concise assistant to software engineers'}
+system_message = {'role': 'system', 'content': 'You are a concise assistant to software developers'}
+# system_message = {'role': 'system', 'content': 'You are an assistant to a nursing professor'}
 
 if __name__ == '__main__':
     greeting(model)
@@ -53,12 +46,18 @@ if __name__ == '__main__':
                 for choice in chunk['choices']:
                     text_part = choice['delta'].get('content', '')
                     full_response.append(text_part)
+                    # if len(text_part) > 4:
+                    #     if text_part[0].isdigit() and text_part[1] == '.' and text_part[-1] in (':', '.'):
+                    #         text_part = BLUE + text_part + GREEN
                     print(text_part, end='')
-                # text_part: dict = chunk['choices'][0]['delta']
-                # content: str = text_part.get('content', '')
-                # print(content, end='')
-            # print(''.join(full_response))
-            # print(tw.fill(s), '\n')
             print('\n')
             messages.append({"role": "assistant", "content": ''.join(full_response)})
             count += 1
+
+# TODO:
+#   - get abs path of this file to find json when pwd is anywhere
+#       (sys.path.extend()???)
+#   - type sys to print system message, sys=__ to change it
+#   - wrap text
+#   - send GET Model Request and display success message
+#   - rewrite using requests library
