@@ -3,3 +3,4 @@ env.json
 .venv/
 
 */__pycache__
+geckodriver.log
