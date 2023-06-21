@@ -13,7 +13,6 @@ model = 'gpt-4'
 
 
 system_message = {'role': 'system', 'content': 'You are a concise assistant to software developers'}
-# system_message = {'role': 'system', 'content': 'You are an assistant to a nursing professor'}
 
 if __name__ == '__main__':
     greeting(model)
@@ -53,8 +52,6 @@ if __name__ == '__main__':
             count += 1
 
 # TODO:
-#   - get abs path of this file to find json when pwd is anywhere
-#       (sys.path.extend()???)
 #   - type sys to print system message, sys=__ to change it
 #   - wrap text
 #   - send GET Model Request and display success message
