@@ -1,5 +1,7 @@
 from json import load
-from os import path, getcwd
+from os import path
 
-with open(path.join(getcwd(), 'env.json')) as file:
+env_file = path.join(path.dirname(path.abspath(__file__)), 'env.json')
+
+with open(env_file) as file:
     CONFIG = load(file)

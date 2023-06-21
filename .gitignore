@@ -1,4 +1,4 @@
-env.json
+api/env.json
 .idea/
 .venv/
 

@@ -1,5 +1,3 @@
-import sys
-from textwrap import TextWrapper
 from typing import Generator
 from shutil import get_terminal_size
 
