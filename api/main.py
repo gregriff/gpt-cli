@@ -1,58 +1,44 @@
-from typing import Generator
-from shutil import get_terminal_size
+from typing import Callable
 
 import openai
 
-from config import CONFIG
+from config import *
+from helpers import get_prompt, prompt_llm
+from functions import clear_history, change_system_msg, change_temp
 from terminal import *
 
-max_text_width = max_text_width(get_terminal_size().columns)
-
+# openai settings
 openai.api_key = CONFIG['lapetusAPIkey']
-model = 'gpt-4'
 
+# runtime variables
+messages, count = [system_message, ], 0
 
-system_message = {'role': 'system', 'content': 'You are a concise assistant to software developers'}
+# lookup table to run functions on certain prompts
+special_case_functions: dict[str, Callable] = {
+    # exit and clear history behevior
+    **{kw: lambda *_: exit(0) for kw in ('exit', 'e', 'q', 'quit',)},
+    **{kw: lambda _, cnt: clear_history(cnt) for kw in ('c', 'clear',)},
+
+    # change settings
+    **{kw: lambda _, cnt: change_system_msg(cnt) for kw in ('sys', 'system', 'message')},
+    **{kw: lambda msgs, cnt: change_temp(msgs, cnt) for kw in ('temp', 'temperature',)}
+}
+
 
 if __name__ == '__main__':
-    greeting(model)
-    messages = [system_message, ]
-    count = 0
+    greeting(prompt_args['model'])
+
     while True:
-        try:
-            prompt = input(f'{BOLD + YELLOW}? {CYAN}> ')
-        except KeyboardInterrupt:
-            exit(0)
-        if prompt in ('exit', 'e', 'q', 'quit',):
-            exit(0)
-        if prompt in ('c', 'clear',):
-            print(RESET, BOLD, BLUE)
-            print(f'history cleared: {count} messages total', '\n', RESET)
-            messages, count = [system_message, ], 0
-            continue
-        else:  # prompt model
-            print(RESET, GREEN)
-            messages.append({'role': 'user', 'content': prompt})
-            response: Generator = openai.ChatCompletion.create(model=model, stream=True,
-                                                               messages=messages,
-                                                               temperature=0.7,
-                                                               max_tokens=1000)
-            full_response = []
-            # tw = TextWrapper(width=max_text_width)
-            for chunk in response:
-                for choice in chunk['choices']:
-                    text_part = choice['delta'].get('content', '')
-                    full_response.append(text_part)
-                    # if len(text_part) > 4:
-                    #     if text_part[0].isdigit() and text_part[1] == '.' and text_part[-1] in (':', '.'):
-                    #         text_part = BLUE + text_part + GREEN
-                    print(text_part, end='')
-            print('\n')
-            messages.append({"role": "assistant", "content": ''.join(full_response)})
-            count += 1
+        prompt, stripped_prompt = get_prompt()
+
+        # see if prompt triggers any predefined action
+        user_action = special_case_functions.get(stripped_prompt)
+
+        # either run the action or prompt the llm; update runtime variables
+        messages, count = user_action(messages, count) \
+            if user_action else prompt_llm(prompt, messages, count)
 
 # TODO:
-#   - type sys to print system message, sys=__ to change it
 #   - wrap text
 #   - send GET Model Request and display success message
 #   - rewrite using requests library

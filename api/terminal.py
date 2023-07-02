@@ -11,7 +11,7 @@ BOLD = "\033[;1m"
 REVERSE = "\033[;7m"
 
 
-def greeting(model):
+def greeting(model: str):
     print(CYAN)
     print('=*=' * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
