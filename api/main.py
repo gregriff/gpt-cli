@@ -15,6 +15,7 @@ messages, count = [system_message, ], 0
 
 # lookup table to run functions on certain prompts
 special_case_functions: dict[str, Callable] = {
+
     # exit and clear history behevior
     **{kw: lambda *_: exit(0) for kw in ('exit', 'e', 'q', 'quit',)},
     **{kw: lambda _, cnt: clear_history(cnt) for kw in ('c', 'clear',)},
@@ -37,8 +38,3 @@ if __name__ == '__main__':
         # either run the action or prompt the llm; update runtime variables
         messages, count = user_action(messages, count) \
             if user_action else prompt_llm(prompt, messages, count)
-
-# TODO:
-#   - wrap text
-#   - send GET Model Request and display success message
-#   - rewrite using requests library
