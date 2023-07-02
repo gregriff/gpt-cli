@@ -7,19 +7,14 @@ from terminal import *
 from config import prompt_args
 
 
-def get_prompt() -> tuple[str, str]:
-    try:
-        prompt = input(f'{BOLD + YELLOW}? {CYAN}> ')
-        stripped = prompt.casefold().strip()
-        return prompt, stripped
-    except KeyboardInterrupt:
-        exit(0)
-
-
 def prompt_llm(prompt: str, messages: list[dict], count: int):
     print(RESET, GREEN)
     messages.append({'role': 'user', 'content': prompt})
-    response: Generator = openai.ChatCompletion.create(messages=messages, **prompt_args)
+    try:
+        response: Generator = openai.ChatCompletion.create(messages=messages, **prompt_args)
+    except openai.error.APIConnectionError as e:
+        print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
+        return messages, count
     full_response = []
     max_text_w = max_text_width(get_terminal_size().columns)
     # tw = TextWrapper(width=max_text_width)
