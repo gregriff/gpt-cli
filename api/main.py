@@ -4,20 +4,20 @@ import openai
 
 from config import *
 from helpers import get_prompt, prompt_llm
-from functions import clear_history, change_system_msg, change_temp
+from functions import clear_history, change_system_msg, change_temp, exit_program
 from terminal import *
 
 # openai settings
 openai.api_key = CONFIG['lapetusAPIkey']
 
 # runtime variables
-messages, count = [system_message, ], 0
+messages, count, tokens = [system_message, ], 0, 0
 
 # lookup table to run functions on certain prompts
 special_case_functions: dict[str, Callable] = {
 
     # exit and clear history behevior
-    **{kw: lambda *_: exit(0) for kw in ('exit', 'e', 'q', 'quit',)},
+    **{kw: lambda *_: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
     **{kw: lambda _, cnt: clear_history(cnt) for kw in ('c', 'clear',)},
 
     # change settings

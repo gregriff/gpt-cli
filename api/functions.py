@@ -9,6 +9,12 @@ def clear_history(count: int, auto=False) -> tuple[list[dict], int]:
     return [system_message, ], 0
 
 
+def exit_program():
+    print()
+    # TODO: use token algo to print total tokens in session
+    exit(0)
+
+
 def change_system_msg(count: int) -> tuple[list[dict], int]:
     prompt = input(f'\n{BOLD + RED}new system message:\n{CYAN}> ')
     new_message = prompt.casefold().strip()
