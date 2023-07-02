@@ -27,7 +27,7 @@ special_case_functions: dict[str, Callable] = {
 
 
 if __name__ == '__main__':
-    greeting(prompt_args['model'])
+    greeting()
 
     while True:
         prompt, stripped_prompt = get_prompt()

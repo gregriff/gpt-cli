@@ -1,5 +1,7 @@
 from importlib.metadata import version
 
+from config import prompt_args
+
 RED = "\033[1;31m"
 BLUE = "\033[1;34m"
 CYAN = "\033[1;36m"
@@ -11,11 +13,11 @@ BOLD = "\033[;1m"
 REVERSE = "\033[;7m"
 
 
-def greeting(model: str):
+def greeting():
     print(CYAN)
     print('=*=' * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
-    print(f'{"model" : <10}{model : <15}', RESET + CYAN)
+    print(f'{"model" : <10}{prompt_args.get("model") : <15}', RESET + CYAN)
     print('=*=' * 10, end='\n\n')
 
 
