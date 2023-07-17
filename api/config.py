@@ -12,4 +12,7 @@ prompt_args = {
     'temperature': 0.7,
     'max_tokens': 1000
 }
-system_message = {'role': 'system', 'content': 'You are a concise assistant to software developers'}
+system_message = {
+    'role': 'system',
+    'content': 'You are a concise assistant to software developers'
+}

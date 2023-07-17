@@ -9,6 +9,7 @@ from config import prompt_args
 
 def prompt_llm(prompt: str, messages: list[dict], count: int):
     print(RESET, GREEN)
+    # print('prompt', prompt)
     messages.append({'role': 'user', 'content': prompt})
     try:
         response: Generator = openai.ChatCompletion.create(messages=messages, **prompt_args)

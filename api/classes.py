@@ -1,17 +1,16 @@
 from typing import Callable
 
-from config import system_message, prompt_args
 from functions import *
-from terminal import *
 from helpers import prompt_llm
+from terminal import *
 
 
 class Prompt:
-    def __init__(self):
-        self.system_msg = system_message
-        self.prompt_arguments = prompt_args
+    def __init__(self, s_msg: dict, p_args: dict):
+        self.system_msg = s_msg
+        self.prompt_arguments = p_args
 
-        self.messages = [self.system_msg, ]
+        self.messages = [s_msg, ]
         self.count = 0
         self.tokens = 0
 
@@ -23,11 +22,11 @@ class Prompt:
 
             # exit and clear history behevior
             **{kw: lambda *_: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
-            **{kw: lambda _, cnt: clear_history(cnt) for kw in ('c', 'clear',)},
+            **{kw: lambda _, count: clear_history(count) for kw in ('c', 'clear',)},
 
             # change settings
-            **{kw: lambda _, cnt: change_system_msg(cnt) for kw in ('sys', 'system', 'message')},
-            **{kw: lambda msgs, cnt: change_temp(msgs, cnt) for kw in ('temp', 'temperature',)}
+            **{kw: lambda _, count: change_system_msg(count) for kw in ('sys', 'system', 'message',)},
+            **{kw: lambda msgs, count: change_temp(msgs, count) for kw in ('temp', 'temperature',)}
         }
 
     def get_prompt(self):
