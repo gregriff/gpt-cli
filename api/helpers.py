@@ -33,18 +33,19 @@ def prompt_llm(prompt: str, messages: list[dict], count: int):
             #   - overwrite all text on far edge with 'crop' style?
             console.print(Text(text_part, style='green', overflow='fold', ), end='')
     final_response = "".join(full_response)
-    newline_count = final_response.count("\n")
-    total_lines = ceil(len(final_response) / console.width) + (newline_count - 1)
-    if newline_count == 0 and total_lines == 0:
-        print(end='\r')
-    else:
-        print(f"\033[{total_lines}A", end="\r")
-    console.print(Markdown(final_response, style='blue', code_theme='ansibrightblue'))
-
-    for i in range(total_lines // 2):
-        print('\033[K')
-    print(f"\033[{total_lines // 2}A", end='\r\n\n')
-    print(f'{newline_count=} {console.width} {total_lines=} {ceil(len(final_response) / console.width)=}')
+    # newline_count = final_response.count("\n")
+    # total_lines = ceil(len(final_response) / console.width) + (newline_count - 1)
+    # if newline_count == 0 and total_lines == 0:
+    #     print(end='\r')
+    # else:
+    #     print(f"\033[{total_lines}A", end="\r")
+    # console.print(Markdown(final_response, style='blue', code_theme='ansibrightblue'))
+    #
+    # for i in range(total_lines // 2):
+    #     print('\033[K')
+    # print(f"\033[{total_lines // 2}A", end='\r\n\n')
+    # print(f'{newline_count=} {console.width} {total_lines=} {ceil(len(final_response) / console.width)=}')
+    print('\n')
     messages.append({"role": "assistant", "content": final_response})
     count += 1
     return messages, count
