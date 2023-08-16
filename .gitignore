@@ -4,3 +4,6 @@ api/env.json
 
 */__pycache__
 geckodriver.log
+
+*.DS_Store
+.DS_Store
