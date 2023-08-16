@@ -1,4 +1,5 @@
 import openai
+from os import system
 
 from config import CONFIG, system_message, prompt_args
 from terminal import *
@@ -9,6 +10,7 @@ openai.api_key = CONFIG['lapetusAPIkey']
 
 
 if __name__ == '__main__':
+    system('clear')
     greeting()
     prompt = Prompt(system_message, prompt_args)
 
