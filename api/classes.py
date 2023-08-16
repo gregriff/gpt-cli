@@ -1,11 +1,22 @@
 from typing import Callable
 from prompt_toolkit import prompt as p
-from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.formatted_text import HTML, ANSI
+from prompt_toolkit.styles import Style
 
 from functions import *
 from helpers import prompt_llm
 from terminal import *
 
+example_style = Style.from_dict({
+    'rprompt': 'bg:#008000 #ffffff',
+})
+
+def get_rprompt():
+    return 'tokens: _'
+
+def prompt_continuation(width, line_number, is_soft_wrap):
+    return '.' * width
+    # Or: return [('', '.' * width)]
 
 class Prompt:
     def __init__(self, s_msg: dict, p_args: dict):
@@ -33,7 +44,7 @@ class Prompt:
 
     def get_prompt(self):
         try:
-            prompt = p(HTML('<ansiyellow>?</ansiyellow> <ansicyan>></ansicyan> '))
+            prompt = p(HTML('<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> '), rprompt=get_rprompt, style=example_style)
             self.stripped_prompt = prompt.casefold().strip()
             self.prompt = prompt
         except KeyboardInterrupt:
