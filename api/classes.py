@@ -1,4 +1,6 @@
 from typing import Callable
+from prompt_toolkit import prompt as p
+from prompt_toolkit.formatted_text import HTML
 
 from functions import *
 from helpers import prompt_llm
@@ -31,7 +33,7 @@ class Prompt:
 
     def get_prompt(self):
         try:
-            prompt = input(f'{BOLD + YELLOW}? {CYAN}> ')
+            prompt = p(HTML('<ansiyellow>?</ansiyellow> <ansicyan>></ansicyan> '))
             self.stripped_prompt = prompt.casefold().strip()
             self.prompt = prompt
         except KeyboardInterrupt:
