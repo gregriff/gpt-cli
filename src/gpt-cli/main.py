@@ -1,7 +1,7 @@
 import openai
 
 from config import CONFIG, system_message, prompt_args
-from terminal import *
+from terminal import greeting
 from classes import Prompt
 
 # openai settings

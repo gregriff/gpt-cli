@@ -1,3 +1,4 @@
+from shutil import get_terminal_size
 from typing import Callable, Generator, Optional
 
 import openai
@@ -31,16 +32,20 @@ class Output:
     Keeps track of how many lines are printed to the screen and pretty-prints everything.
     """
 
-    def __init__(self):
+    def __init__(self, color, theme):
         self.full_response = []
         self.current_line_length = 0
         self.total_num_of_lines = 0
         self.terminal_width = get_terminal_size().columns
         self.max_text_width = self.terminal_width - 2
+
         self.console = Console(width=self.terminal_width)
+        self.color = color
+        self.theme = theme
 
     def print(self, text: str):
-        self.console.print(Text(text, style='green', overflow='fold', ), end='')
+        # TODO: if errors with markdown rendering, play with overflow and softwrap
+        self.console.print(Text(text, style=self.color, overflow='ignore', ), soft_wrap=True, end='')
 
     def update(self, text: str):
         """
@@ -70,7 +75,7 @@ class Output:
             self.print(text)
         self.full_response.append(text)
 
-    def replace_with_markdown(self, theme: Optional[str] = 'monokai', color: Optional[str] = 'green'):
+    def replace_with_markdown(self):
         """
         Called after an entire response has been printed to the screen, this function deletes the entire response
         using ANSI codes and then renders it in markdown
@@ -78,8 +83,8 @@ class Output:
         for _ in range(self.total_num_of_lines):
             print(f'\033[0A', ''*self.max_text_width, end='\r', sep='')
         # print(f"\033[{self.total_num_of_lines}A", end="\r")
-        self.console.print(Markdown(self.final_response(), style=color, code_theme=theme))
-        print('\n')
+        markdown_obj = Markdown(self.final_response(), style=self.color, code_theme=self.theme)
+        self.console.print(markdown_obj, '\n', overflow='fold', highlight=True)
 
     def final_response(self) -> str:
         return "".join(self.full_response)
@@ -141,14 +146,14 @@ class Prompt:
             print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
             return
 
-        output = Output()
+        output = Output(self.color, self.theme)
         for chunk in response:
             for choice in chunk['choices']:
                 text_part = choice['delta'].get('content', '')
                 output.update(text_part)
 
         final_response = output.final_response()
-        output.replace_with_markdown(color=self.color, theme=self.theme)
+        output.replace_with_markdown()
 
         self.messages.append({"role": "assistant", "content": final_response})
         self.count += 1

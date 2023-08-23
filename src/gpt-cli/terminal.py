@@ -1,6 +1,5 @@
 from importlib.metadata import version
 from os import system
-from shutil import get_terminal_size
 
 from config import prompt_args
 
