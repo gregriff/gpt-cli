@@ -61,7 +61,8 @@ class Output:
         else:
             self.current_line_length += len(text)
 
-        # TODO: simple ```...``` parser. When closing ``` is detected, insert a newline, inc newline counter.
+        # TODO: simple ```...``` parser. When closing ``` is detected, if a newline is not the next character,
+        #  insert one, and inc newline counter.
         # this should resolve bugs with duplicate lines after markdown rendering
 
         # wrap text if needed
