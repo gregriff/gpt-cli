@@ -61,6 +61,9 @@ class Output:
         else:
             self.current_line_length += len(text)
 
+        # TODO: simple ```...``` parser. When closing ``` is detected, insert a newline, inc newline counter.
+        # this should resolve bugs with duplicate lines after markdown rendering
+
         # wrap text if needed
         if self.current_line_length >= self.max_text_width:
             slice_idx = self.max_text_width - self.current_line_length
@@ -84,7 +87,7 @@ class Output:
             print(f'\033[0A', ''*self.max_text_width, end='\r', sep='')
         # print(f"\033[{self.total_num_of_lines}A", end="\r")
         markdown_obj = Markdown(self.final_response(), style=self.color, code_theme=self.theme)
-        self.console.print(markdown_obj, '\n', overflow='fold', highlight=True)
+        self.console.print(markdown_obj, '\n', overflow='fold', highlight=False)
 
     def final_response(self) -> str:
         return "".join(self.full_response)
@@ -152,8 +155,11 @@ class Prompt:
                 text_part = choice['delta'].get('content', '')
                 output.update(text_part)
 
-        final_response = output.final_response()
         output.replace_with_markdown()
 
-        self.messages.append({"role": "assistant", "content": final_response})
+        self.messages.append({"role": "assistant", "content": output.final_response()})
         self.count += 1
+
+        # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
+
+        # TODO: use prompt_toolkit to add a bottom bar and a fullscreen settings menu. Could use rich to print in there
