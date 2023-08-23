@@ -15,3 +15,9 @@ if __name__ == '__main__':
     while True:
         prompt.get_prompt()
         prompt.interpret_user_input()
+
+
+# long term todos:
+# - asyncio used to implement multiple prompts at once. Bottom menu bar would allow user
+#   to switch between tabs, giving them a notification when a response on a background tab has completed
+#       - could also dive really deep into rich and try to render markdown in real time while waiting for network io
