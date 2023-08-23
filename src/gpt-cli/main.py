@@ -9,8 +9,8 @@ openai.api_key = CONFIG['lapetusAPIkey']
 
 
 if __name__ == '__main__':
-    greeting()
-    prompt = Prompt('green', 'solarized-dark', system_message, prompt_args)
+    greeting()  # TODO: ASCII art greeting. menu commands in bottom toolbar. fullpage settings menu
+    prompt = Prompt('green', 'monokai', system_message, prompt_args)
 
     while True:
         prompt.get_prompt()

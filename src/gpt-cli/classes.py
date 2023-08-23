@@ -68,10 +68,8 @@ class Output:
         if self.current_line_length >= self.max_text_width:
             slice_idx = self.max_text_width - self.current_line_length
             safe_to_print = text[:slice_idx:]
-            self.print(safe_to_print)
             rest_of_text = text[slice_idx::]
-            self.print('\n' + rest_of_text)
-            # inc newline counter
+            self.print(f'{safe_to_print}\n{rest_of_text}')
             self.total_num_of_lines += 1
             self.current_line_length = len(rest_of_text)
         else:
@@ -111,14 +109,11 @@ class Prompt:
 
         # lookup table to run functions on certain prompts
         self.special_case_functions: dict[str, Callable] = {
-
-            # exit and clear history behavior
             **{kw: lambda: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
             **{kw: lambda: clear_history(self.count) for kw in ('c', 'clear',)},
-
-            # change settings
             **{kw: lambda: change_system_msg(self.count) for kw in ('sys', 'system', 'message',)},
             **{kw: lambda: change_temp(self.messages, self.count) for kw in ('temp', 'temperature',)}
+            # TODO: one func for opening settings menu, sqlite for maintaing settings
         }
 
     def get_prompt(self):
@@ -156,7 +151,6 @@ class Prompt:
                 output.update(text_part)
 
         output.replace_with_markdown()
-
         self.messages.append({"role": "assistant", "content": output.final_response()})
         self.count += 1
 
