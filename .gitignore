@@ -1,8 +1,10 @@
-api/env.json
+src/gpt-cli/env.json
 .idea/
 .venv/
 
 */__pycache__
+__pycache__
+__pycache__/*
 geckodriver.log
 
 *.DS_Store
