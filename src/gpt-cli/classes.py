@@ -1,4 +1,5 @@
 from shutil import get_terminal_size
+from sys import stdout
 from typing import Callable, Generator, Optional
 
 import openai
@@ -82,9 +83,9 @@ class Output:
         Called after an entire response has been printed to the screen, this function deletes the entire response
         using ANSI codes and then renders it in markdown
         """
+        stdout.write(CLEAR_CURRENT_LINE)
         for _ in range(self.total_num_of_lines):
-            print(f'\033[0A', ''*self.max_text_width, end='\r', sep='')
-        # print(f"\033[{self.total_num_of_lines}A", end="\r")
+            stdout.write(CLEAR_LINE_ABOVE_CURRENT)
         markdown_obj = Markdown(self.final_response(), style=self.color, code_theme=self.theme)
         self.console.print(markdown_obj, '\n', overflow='fold', highlight=False)
 
