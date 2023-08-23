@@ -1,4 +1,6 @@
 from importlib.metadata import version
+from os import system
+from shutil import get_terminal_size
 
 from config import prompt_args
 
@@ -14,13 +16,9 @@ REVERSE = "\033[;7m"
 
 
 def greeting():
+    system('clear')
     print(CYAN)
     print('=*=' * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
     print(f'{"model" : <10}{prompt_args.get("model") : <15}', RESET + CYAN)
     print('=*=' * 10, end='\n\n')
-
-
-def max_text_width(term_size_columns: int):
-    # return int(term_size_columns / 2) if term_size_columns > 65 else int(term_size_columns)
-    return max(60, term_size_columns//2)
