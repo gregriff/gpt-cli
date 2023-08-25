@@ -1,4 +1,4 @@
-src/gpt-cli/env.json
+env.json
 .idea/
 .venv/
 
