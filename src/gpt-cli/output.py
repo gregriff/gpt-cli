@@ -59,9 +59,8 @@ class Output:
 
         # wrap text if needed
         if self.current_line_length >= self.max_text_width:
-            slice_idx = self.max_text_width - self.current_line_length
-            safe_to_print = text[:slice_idx:]
-            rest_of_text = text[slice_idx::]
+            partition = self.max_text_width - self.current_line_length
+            safe_to_print, rest_of_text = text[:partition], text[partition:]
             self.print(f'{safe_to_print}\n{rest_of_text}')
             self.total_num_of_lines += 1
             self.current_line_length = len(rest_of_text)
