@@ -33,7 +33,7 @@ class Output:
         self.current_line_length = 0
         self.total_num_of_lines = 0
         self.terminal_width = TERM_WIDTH
-        self.max_text_width = self.terminal_width - 2
+        self.max_text_width = TERM_WIDTH - 2
 
         self.console = Console(width=self.terminal_width, theme=md_theme(color))
         self.color = color  # color of normal text
@@ -56,10 +56,6 @@ class Output:
             self.current_line_length = chars_after_last_newline
         else:
             self.current_line_length += len(text)
-
-        # TODO: simple ```...``` parser. When closing ``` is detected, if a newline is not the next character,
-        #  insert one, and inc newline counter.
-        # this should resolve bugs with duplicate lines after markdown rendering
 
         # wrap text if needed
         if self.current_line_length >= self.max_text_width:

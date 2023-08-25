@@ -4,7 +4,7 @@ from os import path
 env_file = path.join(path.dirname(path.abspath(__file__)), '../../env.json')
 
 with open(env_file) as file:
-    CONFIG = load(file)
+    CONFIG: dict = load(file)
 
 prompt_args = {
     'model': 'gpt-4',

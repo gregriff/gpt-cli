@@ -10,8 +10,9 @@ def clear_history(count: int, auto=False) -> tuple[list[dict], int]:
 
 
 def exit_program():
-    print()
     # TODO: use token algo to print total tokens in session
+    print(CLEAR_CURRENT_LINE)
+    system('clear')
     exit(0)
 
 

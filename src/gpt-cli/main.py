@@ -1,3 +1,5 @@
+import sys
+
 import openai
 
 from config import CONFIG, system_message, prompt_args
@@ -9,16 +11,24 @@ openai.api_key = CONFIG['lapetusAPIkey']
 
 
 if __name__ == '__main__':
-    greeting()  # TODO: ASCII art greeting. menu commands in bottom toolbar. fullpage settings menu
-    prompt = Prompt('green', 'dracula', system_message, prompt_args)
-    # stata-dark. dracula. native. inkpot. vim.
+    # TODO: use a cli lib to parse args for one time run of app (dont save settings) with custom:
+    #   - system message
+    #   - temp
+    #   - model
+    #
+    # TODO Flags:
+    #   "-o" to print full response to stdout and quit program'
 
-    while True:
-        prompt.get_prompt()
-        prompt.interpret_user_input()
+    if len(sys.argv) == 2:
+        system_message['content'] = sys.argv[1]
+    greeting()
+    # stata-dark. dracula. native. inkpot. vim.
+    prompt = Prompt('green', 'dracula', system_message, prompt_args)
+    prompt.run()
 
 
 # long term todos:
+# - menu commands in bottom toolbar. fullpage settings menu
 # - asyncio used to implement multiple prompts at once. Bottom menu bar would allow user
 #   to switch between tabs, giving them a notification when a response on a background tab has completed
 #       - could also dive really deep into rich and try to render markdown in real time while waiting for network io
