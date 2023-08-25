@@ -6,12 +6,27 @@ import openai
 from prompt_toolkit import prompt as p
 from prompt_toolkit.formatted_text import HTML, ANSI
 from prompt_toolkit.styles import Style
-from rich.console import Console
+from rich.console import Console, Theme
 from rich.markdown import Markdown
 from rich.text import Text
 
 from functions import *
 from terminal import *
+
+
+# TODO: use this for consistency. Eventually load these from db.
+# custom_theme = Theme({
+#     "info": "dim cyan",
+#     "warning": "magenta",
+#     "danger": "bold red"
+# })
+
+def md_theme(text_color: str):
+    return Theme({
+        "markdown": text_color,
+        "markdown.code": 'bold blue'
+    })
+
 
 example_style = Style.from_dict({
     'rprompt': 'bg:#008000 #ffffff',
@@ -37,11 +52,11 @@ class Output:
         self.full_response = []
         self.current_line_length = 0
         self.total_num_of_lines = 0
-        self.terminal_width = get_terminal_size().columns
+        self.terminal_width = TERM_WIDTH
         self.max_text_width = self.terminal_width - 2
 
-        self.console = Console(width=self.terminal_width)
-        self.color = color
+        self.console = Console(width=self.terminal_width, theme=md_theme(color))
+        self.color = color  # color of normal text
         self.theme = theme
 
     def print(self, text: str):
@@ -101,7 +116,7 @@ class Prompt:
         self.messages = [s_msg, ]
         self.count = 0
         self.tokens = 0
-        self.terminal_width = get_terminal_size().columns
+        self.terminal_width = TERM_WIDTH
 
         self.prompt = ''
         self.stripped_prompt = ''

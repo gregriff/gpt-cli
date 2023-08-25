@@ -1,5 +1,6 @@
 from importlib.metadata import version
 from os import system
+from shutil import get_terminal_size
 
 from config import prompt_args
 
@@ -17,6 +18,8 @@ CLEAR_CURRENT_LINE = "\r\033[K"
 CLEAR_TO_END_OF_CURSOR = "\033[K"
 MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS = "\033[F"
 CLEAR_LINE_ABOVE_CURRENT = "\033[F\033[K"
+
+TERM_WIDTH = get_terminal_size().columns
 
 
 def greeting():
