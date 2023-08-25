@@ -2,7 +2,7 @@ from importlib.metadata import version
 from os import system
 from shutil import get_terminal_size
 
-from config import prompt_args
+from config import prompt_arguments
 
 RED = "\033[1;31m"
 BLUE = "\033[1;34m"
@@ -27,5 +27,5 @@ def greeting():
     print(CYAN)
     print('=*=' * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
-    print(f'{"model" : <10}{prompt_args.get("model") : <15}', RESET + CYAN)
+    print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', RESET + CYAN)
     print('=*=' * 10, end='\n\n')

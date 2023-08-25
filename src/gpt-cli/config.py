@@ -1,12 +1,13 @@
+import sys
 from json import load
 from os import path
 
-env_file = path.join(path.dirname(path.abspath(__file__)), '../../env.json')
+env_file = path.join(sys.path[0], '../../env.json')
 
 with open(env_file) as file:
     CONFIG: dict = load(file)
 
-prompt_args = {
+prompt_arguments = {
     'model': 'gpt-4',
     'stream': True,
     'temperature': 0.7,

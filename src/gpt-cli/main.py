@@ -1,8 +1,9 @@
 import sys
+from os import path
 
 import openai
 
-from config import CONFIG, system_message, prompt_args
+from config import CONFIG, system_message, prompt_arguments
 from terminal import greeting
 from prompt import Prompt
 
@@ -23,7 +24,7 @@ if __name__ == '__main__':
         system_message['content'] = sys.argv[1]
     greeting()
     # stata-dark. dracula. native. inkpot. vim.
-    prompt = Prompt('green', 'dracula', system_message, prompt_args)
+    prompt = Prompt('green', 'native', system_message, prompt_arguments)
     prompt.run()
 
 

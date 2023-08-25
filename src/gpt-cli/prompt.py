@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Callable, Generator
 
 import openai
@@ -22,11 +23,11 @@ def bottom_toolbar():
 
 
 class Prompt:
-    def __init__(self, text_color: str, code_theme: str, s_msg: dict, p_args: dict):
-        self.system_message = s_msg
-        self.prompt_arguments = p_args
+    def __init__(self, text_color: str, code_theme: str, sys_msg: dict, prompt_args: dict):
+        self.system_message = sys_msg
+        self.prompt_args = prompt_args
 
-        self.messages = [s_msg, ]
+        self.messages = [sys_msg, ]
         self.count = 0
         self.tokens = 0
         self.terminal_width = TERM_WIDTH
@@ -38,7 +39,7 @@ class Prompt:
         self.color = text_color
         self.theme = code_theme
 
-        # lookup table to run functions on certain prompts
+        # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
             **{kw: lambda: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
             **{kw: lambda: clear_history(self.count) for kw in ('c', 'clear',)},
@@ -47,19 +48,16 @@ class Prompt:
             # TODO: one func for opening settings menu, sqlite for maintaing settings
         }
 
-    def run(self):
+    def run(self, *args):
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
+        TODO: given cli args, change program behavior
         """
         while True:
             try:
-                user_input = self.session.prompt(self.prompt, style=example_style)
-                stripped_input = user_input.casefold().strip()
-
-                if (user_action := self.special_case_functions.get(stripped_input)) is not None:
-                    user_action()
-                else:
-                    self.prompt_llm(user_input)
+                user_input: str = self.session.prompt(self.prompt, style=example_style)
+                cleaned_input = user_input.casefold().strip()
+                self.special_case_functions.get(cleaned_input, partial(self.prompt_llm, user_input))()
             except KeyboardInterrupt:
                 print()
                 continue
@@ -70,7 +68,7 @@ class Prompt:
         print(RESET)
         self.messages.append({'role': 'user', 'content': user_input})
         try:
-            response: Generator = openai.ChatCompletion.create(messages=self.messages, **self.prompt_arguments)
+            response: Generator = openai.ChatCompletion.create(messages=self.messages, **self.prompt_args)
         except openai.error.APIConnectionError as e:
             print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
             return
@@ -89,11 +87,11 @@ class Prompt:
 
         # TODO: use prompt_toolkit to add a bottom bar and a fullscreen settings menu. Could use rich to print in there
 
-        @self.bindings.add('c-t')
+        @self.bindings.add('c-n')
         def open_settings(event):
-            " Say 'hello' when `c-t` is pressed. "
+            " Open settings menu/controls when `c-n` is pressed. "
 
             # def print_hello():
             #     print('hello world')
             #
-            # run_in_terminal(print_hello)
+            # run_in_terminal(print_hello)  # need this if still want to use prompt while hook is printing

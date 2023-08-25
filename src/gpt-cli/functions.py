@@ -28,7 +28,7 @@ def change_temp(messages: list[dict], count: int):
     prompt = input(f'\n{BOLD + RED}new temperature:\n{CYAN}> ')
     new_temp = float(prompt.casefold().strip())
     if 0.0 < new_temp < 1.0:
-        prompt_args['temperature'] = new_temp
+        prompt_arguments['temperature'] = new_temp
         reply = f'\ntemperature set to: "{new_temp}"'
     else:
         reply = f'\ninvalid temperature: {new_temp}, must be 0 < temp < 1'
