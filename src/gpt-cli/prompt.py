@@ -12,7 +12,6 @@ from functions import *
 from terminal import *
 from output import Output
 
-
 example_style = Style.from_dict({
     'bottom-toolbar': ' #ffffff',
 })
@@ -20,6 +19,10 @@ example_style = Style.from_dict({
 
 def bottom_toolbar():
     return [('class:bottom-toolbar', 'Tokens: ')]
+
+    # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
+
+    # TODO: use prompt_toolkit to add a bottom bar and a fullscreen settings menu. Could use rich to print in there
 
 
 class Prompt:
@@ -42,9 +45,9 @@ class Prompt:
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
             **{kw: lambda: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
-            **{kw: lambda: clear_history(self.count) for kw in ('c', 'clear',)},
-            **{kw: lambda: change_system_msg(self.count) for kw in ('sys', 'system', 'message',)},
-            **{kw: lambda: change_temp(self.messages, self.count) for kw in ('temp', 'temperature',)}
+            **{kw: lambda: self.clear_history() for kw in ('c', 'clear',)},
+            **{kw: lambda: self.change_system_msg() for kw in ('sys', 'system', 'message',)},
+            **{kw: lambda: self.change_temp() for kw in ('temp', 'temperature',)}
             # TODO: one func for opening settings menu, sqlite for maintaing settings
         }
 
@@ -57,6 +60,10 @@ class Prompt:
             try:
                 user_input: str = self.session.prompt(self.prompt, style=example_style)
                 cleaned_input = user_input.casefold().strip()
+                # if user_action := self.special_case_functions.get(cleaned_input):
+                #     user_action()
+                # else:
+                #     self.prompt_llm(user_input)
                 self.special_case_functions.get(cleaned_input, partial(self.prompt_llm, user_input))()
             except KeyboardInterrupt:
                 print()
@@ -83,15 +90,43 @@ class Prompt:
         self.messages.append({"role": "assistant", "content": output.final_response()})
         self.count += 1
 
-        # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
+    def clear_history(self, auto=False) -> None:
+        print(RESET, BOLD, BLUE)
+        if not auto or self.count:
+            print(f'history cleared: {self.count} messages total', '\n', RESET)
+        self.messages = [system_message, ]
+        self.count = 0
 
-        # TODO: use prompt_toolkit to add a bottom bar and a fullscreen settings menu. Could use rich to print in there
+    def change_system_msg(self) -> None:
+        prompt = input(f'\n{BOLD + RED}new system message:\n{CYAN}> ')
+        new_message = prompt.casefold().strip()
+        self.system_message['content'] = new_message
+        print(BOLD + YELLOW, f'\nsystem message set to: "{new_message}"', sep='')
+        self.clear_history(auto=True)
 
-        @self.bindings.add('c-n')
-        def open_settings(event):
-            " Open settings menu/controls when `c-n` is pressed. "
+    def change_temp(self):
+        prompt = input(f'\n{BOLD + RED}new temperature:\n{CYAN}> ')
+        new_temp = float(prompt.casefold().strip())
+        if 0.0 < new_temp < 1.0:
+            self.prompt_args['temperature'] = new_temp
+            reply = f'\ntemperature set to: "{new_temp}"'
+        else:
+            reply = f'\ninvalid temperature: {new_temp}, must be 0 < temp < 1'
+        print(BOLD + YELLOW, reply, '\n', sep='')
 
-            # def print_hello():
-            #     print('hello world')
-            #
-            # run_in_terminal(print_hello)  # need this if still want to use prompt while hook is printing
+
+def exit_program():
+    # TODO: use token algo to print total tokens in session
+    print(CLEAR_CURRENT_LINE)
+    system('clear')
+    exit(0)
+
+    # TODO: need to manually wrap this open_settings function
+    # @self.bindings.add('c-n')
+    # def open_settings(event):
+    #     " Open settings menu/controls when `c-n` is pressed. "
+
+    # def print_hello():
+    #     print('hello world')
+    #
+    # run_in_terminal(print_hello)  # need this if still want to use prompt while hook is printing
