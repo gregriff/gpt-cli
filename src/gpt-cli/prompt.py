@@ -93,7 +93,7 @@ class Prompt:
         print(RESET, BOLD, BLUE)
         if not auto or self.count:
             print(f'history cleared: {self.count} messages total', '\n', RESET)
-        self.messages = [system_message, ]
+        self.messages = [self.system_message, ]
         self.count = 0
 
     def change_system_msg(self) -> None:
