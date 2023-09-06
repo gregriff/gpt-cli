@@ -16,6 +16,10 @@ if __name__ == '__main__':
     #   - system message
     #   - temp
     #   - model
+    #   - theme
+    #   - output main color
+    #
+    # ensure cli lib generates man pages
     #
     # TODO Flags:
     #   "-o" to print full response to stdout and quit program'
