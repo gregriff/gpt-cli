@@ -38,6 +38,7 @@ class Prompt:
         self.count = 0
         self.tokens = 0
         self.price_per_token = gpt_pricing(self.model, prompt=True)
+        self.total_cost = 0
         self.terminal_width = TERM_WIDTH
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
@@ -71,9 +72,14 @@ class Prompt:
             except KeyboardInterrupt:
                 print()
                 continue
-            except EOFError:
-                # print total cost
-                exit_program()
+            except EOFError:  # ctrl + D
+                print(CLEAR_CURRENT_LINE)
+                system('clear')
+                self.console.print(
+                    f"total cost of last session: ${self.total_cost:.3f}",
+                    justify='right',
+                    style='dim')
+                exit(0)
 
     def prompt_llm(self, user_input: str):
         print(RESET)
@@ -91,14 +97,16 @@ class Prompt:
                     output.print(text_part)
 
         self.messages.append({"role": "assistant", "content": output.full_response})
-        total_price = self.num_tokens() * self.price_per_token
-        self.console.print(f"Price: ${total_price:.3f}", justify='right', style='dim')
+
+        ending_line = f"Price: ${total_price:.3f}" if (total_price := self.get_current_cost()) >= 0.01 else ''
+        self.console.print(ending_line, justify='right', style='dim')
         self.count += 1
 
     def clear_history(self, auto=False) -> None:
         print(RESET, BOLD, BLUE)
         if not auto or self.count:
             print(f'history cleared: {self.count} messages total', '\n', RESET)
+        self.total_cost += self.get_current_cost()
         self.messages = [self.system_message, ]
         self.count = 0
 
@@ -136,6 +144,9 @@ class Prompt:
                     num_tokens += -1  # role is always required and always 1 token
         num_tokens += 2  # every reply is primed with <im_start>assistant
         return num_tokens
+
+    def get_current_cost(self) -> float:
+        return self.num_tokens() * self.price_per_token
 
 
 def exit_program():
