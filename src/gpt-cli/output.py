@@ -1,9 +1,11 @@
 from sys import stdout
+from typing import Optional
 
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.text import Text
 from rich.theme import Theme
+from rich.live import Live
 
 from terminal import *
 
@@ -29,55 +31,26 @@ class Output:
     """
 
     def __init__(self, color, theme):
-        self.full_response = []
-        self.current_line_length = 0
-        self.total_num_of_lines = 0
+        self.full_response = ''
         self.terminal_width = TERM_WIDTH
-        self.max_text_width = TERM_WIDTH - 2
 
-        self.console = Console(width=self.terminal_width, theme=md_theme(color))
+        self._console = Console(width=self.terminal_width, theme=md_theme(color))
+        self.live: Optional[Live] = None
         self.color = color  # color of normal text
         self.theme = theme
 
-    def print(self, text: str):
-        # TODO: if errors with markdown rendering, play with overflow and softwrap
-        self.console.print(Text(text, style=self.color, overflow='ignore', ), soft_wrap=True, end='')
+    def __enter__(self) -> "Output":
+        self.live = Live(console=self._console, refresh_per_second=8, auto_refresh=False, vertical_overflow="visible")
+        self.live.__enter__()
+        return self
 
-    def update(self, text: str):
-        """
-        Given a partial response from openai api, print it, ensuring it is wrapped to the max text width, and keep
-        track of the number of lines total so far
-        """
-        # ensure newlines are counted
-        newlines_in_text = text.count('\n')
-        if newlines_in_text:
-            self.total_num_of_lines += newlines_in_text
-            chars_after_last_newline = len(text.split('\n')[-1])
-            self.current_line_length = chars_after_last_newline
+    def __exit__(self, *args):
+        self.live.__exit__(*args)
+        self._console.print()
+
+    def print(self, text: str, markdown=True):
+        self.full_response += text
+        if markdown:
+            self.live.update(Markdown(self.full_response, code_theme=self.theme, style=self.color), refresh=True)
         else:
-            self.current_line_length += len(text)
-
-        # wrap text if needed
-        if self.current_line_length >= self.max_text_width:
-            partition = self.max_text_width - self.current_line_length
-            safe_to_print, rest_of_text = text[:partition], text[partition:]
-            self.print(f'{safe_to_print}\n{rest_of_text}')
-            self.total_num_of_lines += 1
-            self.current_line_length = len(rest_of_text)
-        else:
-            self.print(text)
-        self.full_response.append(text)
-
-    def replace_with_markdown(self):
-        """
-        Called after an entire response has been printed to the screen, this function deletes the entire response
-        using ANSI codes and then renders it in markdown
-        """
-        stdout.write(CLEAR_CURRENT_LINE)
-        for _ in range(self.total_num_of_lines):
-            stdout.write(CLEAR_LINE_ABOVE_CURRENT)
-        markdown_obj = Markdown(self.final_response(), style=self.color, code_theme=self.theme)
-        self.console.print(markdown_obj, '\n', overflow='fold', highlight=False)
-
-    def final_response(self) -> str:
-        return "".join(self.full_response)
+            self._console.print(Text(text, style=self.color, overflow='ignore', ), soft_wrap=True, end='')

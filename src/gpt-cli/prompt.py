@@ -59,11 +59,8 @@ class Prompt:
             try:
                 user_input: str = self.session.prompt(self.prompt, style=example_style)
                 cleaned_input = user_input.casefold().strip()
-                # if user_action := self.special_case_functions.get(cleaned_input):
-                #     user_action()
-                # else:
-                #     self.prompt_llm(user_input)
-                self.special_case_functions.get(cleaned_input, partial(self.prompt_llm, user_input))()
+                prompt_the_llm = partial(self.prompt_llm, user_input)
+                self.special_case_functions.get(cleaned_input, prompt_the_llm)()
             except KeyboardInterrupt:
                 print()
                 continue
@@ -79,14 +76,13 @@ class Prompt:
             print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
             return
 
-        output = Output(self.color, self.theme)
-        for chunk in response:
-            for choice in chunk['choices']:
-                text_part = choice['delta'].get('content', '')
-                output.update(text_part)
+        with Output(self.color, self.theme) as output:
+            for chunk in response:
+                for choice in chunk['choices']:
+                    text_part = choice['delta'].get('content', '')
+                    output.print(text_part)
 
-        output.replace_with_markdown()
-        self.messages.append({"role": "assistant", "content": output.final_response()})
+        self.messages.append({"role": "assistant", "content": output.full_response})
         self.count += 1
 
     def clear_history(self, auto=False) -> None:
