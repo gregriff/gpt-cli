@@ -7,17 +7,21 @@ from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
+from rich.console import Console
+from tiktoken import encoding_for_model
 
 from terminal import *
 from output import Output
+from costs import gpt_pricing
 
-example_style = Style.from_dict({
-    'bottom-toolbar': ' #ffffff',
-})
+# example_style = Style.from_dict({
+#     'toolbar': 'bg:#002b36'
+# })
 
 
-def bottom_toolbar():
-    return [('class:bottom-toolbar', 'Tokens: ')]
+def bottom_toolbar(num_tokens: int, price: float):
+    total_price = num_tokens * price
+    return [('class:toolbar', f"Price: ${total_price:.3f}")]
 
     # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
 
@@ -28,13 +32,16 @@ class Prompt:
     def __init__(self, text_color: str, code_theme: str, sys_msg: dict, prompt_args: dict):
         self.system_message = sys_msg
         self.prompt_args = prompt_args
+        self.model = prompt_args['model']
 
         self.messages = [sys_msg, ]
         self.count = 0
         self.tokens = 0
+        self.price_per_token = gpt_pricing(self.model, prompt=True)
         self.terminal_width = TERM_WIDTH
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
+        self.console = Console()
         self.prompt = HTML('<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> ')
         self.bindings = KeyBindings()
 
@@ -57,7 +64,7 @@ class Prompt:
         """
         while True:
             try:
-                user_input: str = self.session.prompt(self.prompt, style=example_style)
+                user_input: str = self.session.prompt(self.prompt)
                 cleaned_input = user_input.casefold().strip()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -65,6 +72,7 @@ class Prompt:
                 print()
                 continue
             except EOFError:
+                # print total cost
                 exit_program()
 
     def prompt_llm(self, user_input: str):
@@ -83,6 +91,8 @@ class Prompt:
                     output.print(text_part)
 
         self.messages.append({"role": "assistant", "content": output.full_response})
+        total_price = self.num_tokens() * self.price_per_token
+        self.console.print(f"Price: ${total_price:.3f}", justify='right', style='dim')
         self.count += 1
 
     def clear_history(self, auto=False) -> None:
@@ -108,6 +118,24 @@ class Prompt:
         else:
             reply = f'\ninvalid temperature: {new_temp}, must be 0 < temp < 1'
         print(BOLD + YELLOW, reply, '\n', sep='')
+
+    def num_tokens(self) -> int:
+        '''
+        Get the total number of tokens used in the current chat history given OpenAI's token
+        counting package `tiktoken`
+        '''
+        encoding = encoding_for_model(self.prompt_args['model'])
+        num_tokens = 0
+        for message in self.messages:
+            # every message follows <im_start>{role/name}\n{content}<im_end>\n
+            num_tokens += 4
+            for role, text in message.items():
+                assert isinstance(text, str)
+                num_tokens += len(encoding.encode(text))
+                if role == "name":  # if there's a name, the role is omitted
+                    num_tokens += -1  # role is always required and always 1 token
+        num_tokens += 2  # every reply is primed with <im_start>assistant
+        return num_tokens
 
 
 def exit_program():
