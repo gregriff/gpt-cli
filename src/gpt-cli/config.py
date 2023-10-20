@@ -18,5 +18,5 @@ prompt_arguments = {
 }
 system_message = {
     'role': 'system',
-    'content': 'You are a concise assistant to software developers'
+    'content': 'You are a concise assistant to a software engineer'
 }
