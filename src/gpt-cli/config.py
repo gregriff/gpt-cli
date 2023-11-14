@@ -11,7 +11,7 @@ with open(env_file) as file:
     CONFIG: dict = load(file)
 
 prompt_arguments = {
-    'model': 'gpt-4',
+    'model': 'gpt-4-1106-preview',
     'stream': True,
     'temperature': 0.7,
     'max_tokens': 1000
