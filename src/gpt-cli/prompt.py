@@ -66,7 +66,7 @@ class Prompt:
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
             **{
-                kw: lambda: exit_program()
+                kw: exit_program
                 for kw in (
                     "exit",
                     "e",
@@ -75,14 +75,14 @@ class Prompt:
                 )
             },
             **{
-                kw: lambda: self.clear_history()
+                kw: self.clear_history
                 for kw in (
                     "c",
                     "clear",
                 )
             },
             **{
-                kw: lambda: self.change_system_msg()
+                kw: self.change_system_msg
                 for kw in (
                     "sys",
                     "system",
@@ -90,7 +90,7 @@ class Prompt:
                 )
             },
             **{
-                kw: lambda: self.change_temp()
+                kw: self.change_temp
                 for kw in (
                     "temp",
                     "temperature",
@@ -99,14 +99,14 @@ class Prompt:
             # TODO: one func for opening settings menu, sqlite for maintaing settings
         }
 
-    def run(self, *args):
+    def run(self, initial_prompt: str | None = None, *args):
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         TODO: given cli args, change program behavior
         """
         while True:
             try:
-                user_input: str = self.session.prompt(self.prompt)
+                user_input: str = initial_prompt if initial_prompt is not None else self.session.prompt(self.prompt)
                 cleaned_input = user_input.casefold().strip()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -122,6 +122,8 @@ class Prompt:
                     style="dim",
                 )
                 exit(0)
+            finally:
+                initial_prompt = None
 
     def prompt_llm(self, user_input: str):
         print(RESET)

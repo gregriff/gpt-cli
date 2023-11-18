@@ -1,4 +1,7 @@
 openai
-rich
 prompt_toolkit
 tiktoken
+typer[all]
+
+# dev
+black

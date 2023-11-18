@@ -16,7 +16,7 @@ prompt_arguments = {
     "temperature": 0.7,
     "max_tokens": 1000,
 }
-system_message = {
+default_system_message = {
     "role": "system",
     "content": "You are a concise assistant to a software engineer",
 }
