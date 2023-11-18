@@ -106,7 +106,11 @@ class Prompt:
         """
         while True:
             try:
-                user_input: str = initial_prompt if initial_prompt is not None else self.session.prompt(self.prompt)
+                user_input: str = (
+                    initial_prompt
+                    if initial_prompt is not None
+                    else self.session.prompt(self.prompt)
+                )
                 cleaned_input = user_input.casefold().strip()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()

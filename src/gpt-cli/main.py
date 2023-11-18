@@ -18,24 +18,26 @@ from prompt import Prompt
 # integrate typer as the frontend:
 #   - replace all prompt-toolkit and hardcoded keyboard actions into typer, or maybe just wrap startup functionality with
 #     typer and keep in-app keyboard interactions the same
-# app = typer.Typer()
+# app = typer.Typer(name='gpt-cli')
 
 
 def validate_code_styles(value: str):
     if value not in (valid_styles := list(styles.get_all_styles())):
-        raise typer.BadParameter(f"Invalid option: {value}. Choose from {valid_styles}")
+        raise typer.BadParameter(f"{value} \n\nChoose from {valid_styles}")
 
 
 code_styles = tuple(styles.get_all_styles())
-CodeStyles = Enum('code styles', code_styles)
+CodeStyles = Enum("code styles", code_styles)
 
 
 def main(
-        prompt: Annotated[str, typer.Argument()] = None,
-        system_message: Optional[str] = None,
-        code_style: Annotated[Optional[str], typer.Option(callback=validate_code_styles)] = 'native',
-        # code_style: CodeStyles = CodeStyles.native,
-        text_color: Annotated[str, typer.Option()] = 'green'
+    prompt: Annotated[str, typer.Argument()] = None,
+    system_message: Optional[str] = default_system_message["content"],
+    code_style: Annotated[
+        Optional[str], typer.Option(callback=validate_code_styles)
+    ] = "native",
+    # code_style: CodeStyles = CodeStyles.native,
+    text_color: Annotated[str, typer.Option()] = "green",
 ):
     # TODO: use a cli lib to parse args for one time run of app (dont save settings) with custom:
     #   - temp
@@ -48,12 +50,13 @@ def main(
     #   "-o" to print full response to stdout and quit program'
     api_key = CONFIG.get("lapetusAPIkey")
 
-    if system_message is not None:
-        default_system_message["content"] = system_message
+    default_system_message["content"] = system_message
 
     greeting()
     # stata-dark. dracula. native. inkpot. vim.
-    _prompt = Prompt(text_color, code_style, default_system_message, api_key, prompt_arguments)
+    _prompt = Prompt(
+        text_color, code_style, default_system_message, api_key, prompt_arguments
+    )
     _prompt.run(prompt)
 
 
