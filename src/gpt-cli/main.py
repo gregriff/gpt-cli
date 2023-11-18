@@ -18,7 +18,7 @@ from prompt import Prompt
 # integrate typer as the frontend:
 #   - replace all prompt-toolkit and hardcoded keyboard actions into typer, or maybe just wrap startup functionality with
 #     typer and keep in-app keyboard interactions the same
-# app = typer.Typer(name='gpt-cli')
+app = typer.Typer(name='gpt-cli')
 
 
 def validate_code_styles(value: str):
@@ -30,6 +30,7 @@ code_styles = tuple(styles.get_all_styles())
 CodeStyles = Enum("code styles", code_styles)
 
 
+@app.command()
 def main(
     prompt: Annotated[str, typer.Argument()] = None,
     system_message: Optional[str] = default_system_message["content"],
@@ -61,8 +62,8 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
-    # app()
+    # typer.run(main)
+    app()
 
 # long term todos:
 # - menu commands in bottom toolbar. fullpage settings menu
