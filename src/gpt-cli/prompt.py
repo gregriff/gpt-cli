@@ -1,7 +1,9 @@
 from functools import partial
 from typing import Callable, Generator
 
-import openai
+from openai import OpenAI, APIConnectionError, Stream
+from openai.types.chat import ChatCompletionChunk
+
 from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
@@ -29,8 +31,9 @@ def bottom_toolbar(num_tokens: int, price: float):
 
 
 class Prompt:
-    def __init__(self, text_color: str, code_theme: str, sys_msg: dict, prompt_args: dict):
+    def __init__(self, text_color: str, code_theme: str, sys_msg: dict, api_key: str, prompt_args: dict):
         self.system_message = sys_msg
+        self.client = OpenAI(api_key=api_key)
         self.prompt_args = prompt_args
         self.model = prompt_args['model']
 
@@ -85,16 +88,16 @@ class Prompt:
         print(RESET)
         self.messages.append({'role': 'user', 'content': user_input})
         try:
-            response: Generator = openai.ChatCompletion.create(messages=self.messages, **self.prompt_args)
-        except openai.error.APIConnectionError as e:
+            response_stream: Stream[ChatCompletionChunk] = self.client.chat.completions.create(messages=self.messages, **self.prompt_args)
+        except APIConnectionError as e:
             print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
             return
 
         with Output(self.color, self.theme) as output:
-            for chunk in response:
-                for choice in chunk['choices']:
-                    text_part = choice['delta'].get('content', '')
-                    output.print(text_part)
+            for chunk in response_stream:
+                for choice in chunk.choices:
+                    chunk_text = choice.delta.content or ''
+                    output.print(chunk_text)
 
         self.messages.append({"role": "assistant", "content": output.full_response})
 
