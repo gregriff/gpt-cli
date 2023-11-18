@@ -16,11 +16,9 @@ from terminal import *
 #     "danger": "bold red"
 # })
 
+
 def md_theme(text_color: str):
-    return Theme({
-        "markdown": text_color,
-        "markdown.code": 'bold blue'
-    })
+    return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
 class Output:
@@ -30,7 +28,7 @@ class Output:
     """
 
     def __init__(self, color, theme):
-        self.full_response = ''
+        self.full_response = ""
         self.terminal_width = TERM_WIDTH
 
         self._console = Console(width=self.terminal_width, theme=md_theme(color))
@@ -39,7 +37,12 @@ class Output:
         self.theme = theme
 
     def __enter__(self) -> "Output":
-        self.live = Live(console=self._console, refresh_per_second=8, auto_refresh=False, vertical_overflow="visible")
+        self.live = Live(
+            console=self._console,
+            refresh_per_second=8,
+            auto_refresh=False,
+            vertical_overflow="visible",
+        )
         self.live.__enter__()
         return self
 
@@ -50,6 +53,17 @@ class Output:
     def print(self, text: str, markdown=True):
         self.full_response += text
         if markdown:
-            self.live.update(Markdown(self.full_response, code_theme=self.theme, style=self.color), refresh=True)
+            self.live.update(
+                Markdown(self.full_response, code_theme=self.theme, style=self.color),
+                refresh=True,
+            )
         else:
-            self._console.print(Text(text, style=self.color, overflow='ignore', ), soft_wrap=True, end='')
+            self._console.print(
+                Text(
+                    text,
+                    style=self.color,
+                    overflow="ignore",
+                ),
+                soft_wrap=True,
+                end="",
+            )

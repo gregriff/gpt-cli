@@ -23,9 +23,9 @@ TERM_WIDTH = get_terminal_size().columns
 
 
 def greeting():
-    system('clear')
+    system("clear")
     print(CYAN)
-    print('=*=' * 10, ORANGE)
+    print("=*=" * 10, ORANGE)
     print(f'{"openai" : <10}{"v" + version("openai") : <15}')
     print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', RESET + CYAN)
-    print('=*=' * 10, end='\n\n')
+    print("=*=" * 10, end="\n\n")

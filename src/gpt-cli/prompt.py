@@ -23,7 +23,7 @@ from costs import gpt_pricing
 
 def bottom_toolbar(num_tokens: int, price: float):
     total_price = num_tokens * price
-    return [('class:toolbar', f"Price: ${total_price:.3f}")]
+    return [("class:toolbar", f"Price: ${total_price:.3f}")]
 
     # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
 
@@ -31,13 +31,22 @@ def bottom_toolbar(num_tokens: int, price: float):
 
 
 class Prompt:
-    def __init__(self, text_color: str, code_theme: str, sys_msg: dict, api_key: str, prompt_args: dict):
+    def __init__(
+        self,
+        text_color: str,
+        code_theme: str,
+        sys_msg: dict,
+        api_key: str,
+        prompt_args: dict,
+    ):
         self.system_message = sys_msg
         self.client = OpenAI(api_key=api_key)
         self.prompt_args = prompt_args
-        self.model = prompt_args['model']
+        self.model = prompt_args["model"]
 
-        self.messages = [sys_msg, ]
+        self.messages = [
+            sys_msg,
+        ]
         self.count = 0
         self.tokens = 0
         self.price_per_token = gpt_pricing(self.model, prompt=True)
@@ -46,7 +55,9 @@ class Prompt:
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
         self.console = Console()
-        self.prompt = HTML('<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> ')
+        self.prompt = HTML(
+            "<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> "
+        )
         self.bindings = KeyBindings()
 
         self.color = text_color
@@ -54,10 +65,37 @@ class Prompt:
 
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
-            **{kw: lambda: exit_program() for kw in ('exit', 'e', 'q', 'quit',)},
-            **{kw: lambda: self.clear_history() for kw in ('c', 'clear',)},
-            **{kw: lambda: self.change_system_msg() for kw in ('sys', 'system', 'message',)},
-            **{kw: lambda: self.change_temp() for kw in ('temp', 'temperature',)}
+            **{
+                kw: lambda: exit_program()
+                for kw in (
+                    "exit",
+                    "e",
+                    "q",
+                    "quit",
+                )
+            },
+            **{
+                kw: lambda: self.clear_history()
+                for kw in (
+                    "c",
+                    "clear",
+                )
+            },
+            **{
+                kw: lambda: self.change_system_msg()
+                for kw in (
+                    "sys",
+                    "system",
+                    "message",
+                )
+            },
+            **{
+                kw: lambda: self.change_temp()
+                for kw in (
+                    "temp",
+                    "temperature",
+                )
+            }
             # TODO: one func for opening settings menu, sqlite for maintaing settings
         }
 
@@ -77,65 +115,76 @@ class Prompt:
                 continue
             except EOFError:  # ctrl + D
                 print(CLEAR_CURRENT_LINE)
-                system('clear')
+                system("clear")
                 self.console.print(
                     f"total cost of last session: ${self.total_cost:.3f}",
-                    justify='right',
-                    style='dim')
+                    justify="right",
+                    style="dim",
+                )
                 exit(0)
 
     def prompt_llm(self, user_input: str):
         print(RESET)
-        self.messages.append({'role': 'user', 'content': user_input})
+        self.messages.append({"role": "user", "content": user_input})
         try:
-            response_stream: Stream[ChatCompletionChunk] = self.client.chat.completions.create(messages=self.messages, **self.prompt_args)
+            response_stream: Stream[
+                ChatCompletionChunk
+            ] = self.client.chat.completions.create(
+                messages=self.messages, **self.prompt_args
+            )
         except APIConnectionError as e:
-            print(YELLOW, f'Could not connect to API. Error: {str(e)}\n')
+            print(YELLOW, f"Could not connect to API. Error: {str(e)}\n")
             return
 
         with Output(self.color, self.theme) as output:
             for chunk in response_stream:
                 for choice in chunk.choices:
-                    chunk_text = choice.delta.content or ''
+                    chunk_text = choice.delta.content or ""
                     output.print(chunk_text)
 
         self.messages.append({"role": "assistant", "content": output.full_response})
 
-        ending_line = f"Price: ${total_price:.3f}" if (total_price := self.get_current_cost()) >= 0.01 else ''
-        self.console.print(ending_line, justify='right', style='dim')
+        ending_line = (
+            f"Price: ${total_price:.3f}"
+            if (total_price := self.get_current_cost()) >= 0.01
+            else ""
+        )
+        self.console.print(ending_line, justify="right", style="dim")
         self.count += 1
 
     def clear_history(self, auto=False) -> None:
         print(RESET, BOLD, BLUE)
         if not auto or self.count:
-            print(f'history cleared: {self.count} messages total', '\n', RESET)
+            print(f"history cleared: {self.count} messages total", "\n", RESET)
         self.total_cost += self.get_current_cost()
-        self.messages = [self.system_message, ]
+        self.messages = [
+            self.system_message,
+        ]
         self.count = 0
 
     def change_system_msg(self) -> None:
-        prompt = input(f'\n{BOLD + RED}new system message:\n{CYAN}> ')
+        prompt = input(f"\n{BOLD + RED}new system message:\n{CYAN}> ")
         new_message = prompt.casefold().strip()
-        self.system_message['content'] = new_message
-        print(BOLD + YELLOW, f'\nsystem message set to: "{new_message}"', sep='')
+        self.system_message["content"] = new_message
+        print(BOLD + YELLOW, f'\nsystem message set to: "{new_message}"', sep="")
         self.clear_history(auto=True)
 
     def change_temp(self):
-        prompt = input(f'\n{BOLD + RED}new temperature:\n{CYAN}> ')
+        prompt = input(f"\n{BOLD + RED}new temperature:\n{CYAN}> ")
         new_temp = float(prompt.casefold().strip())
         if 0.0 < new_temp < 1.0:
-            self.prompt_args['temperature'] = new_temp
+            self.prompt_args["temperature"] = new_temp
             reply = f'\ntemperature set to: "{new_temp}"'
         else:
-            reply = f'\ninvalid temperature: {new_temp}, must be 0 < temp < 1'
-        print(BOLD + YELLOW, reply, '\n', sep='')
+            reply = f"\ninvalid temperature: {new_temp}, must be 0 < temp < 1"
+        print(BOLD + YELLOW, reply, "\n", sep="")
 
     def num_tokens(self) -> int:
-        '''
+        """
         Get the total number of tokens used in the current chat history given OpenAI's token
         counting package `tiktoken`
-        '''
-        encoding = encoding_for_model(self.prompt_args['model'])
+        """
+        encoding = encoding_for_model(self.prompt_args["model"])
         num_tokens = 0
         for message in self.messages:
             # every message follows <im_start>{role/name}\n{content}<im_end>\n
@@ -155,7 +204,7 @@ class Prompt:
 def exit_program():
     # TODO: use token algo to print total tokens in session
     print(CLEAR_CURRENT_LINE)
-    system('clear')
+    system("clear")
     exit(0)
 
     # TODO: need to manually wrap this open_settings function
