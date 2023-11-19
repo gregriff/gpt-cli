@@ -8,9 +8,12 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
+from rich import box
+from rich.panel import Panel
 
 from rich.style import Style
 from rich.console import Console
+from rich.text import Text
 from tiktoken import encoding_for_model
 
 from terminal import *
@@ -105,6 +108,25 @@ class Prompt:
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
         greeting()
+
+        system("clear")
+        help_text = Text(justify="center")
+        # help_text.append(f'{"openai" : <10}{"v" + version("openai") : <15}', style='orange')
+        help_text.append(
+            f'{"model" : <10}{prompt_arguments.get("model") : <15}', style="orange"
+        )
+
+        # print(CYAN)
+        # print("=*=" * 10, ORANGE)
+        # print(f'{"openai" : <10}{"v" + version("openai") : <15}')
+        # print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', RESET + CYAN)
+        # print("=*=" * 10, end="\n\n")
+
+        # Create a panel with the help text, you can customize the box style
+        panel = Panel(help_text, box=box.ROUNDED, style="cyan")
+
+        # Print the panel to the console
+        self.console.print(panel)
 
         while True:
             try:
