@@ -103,9 +103,7 @@ class Prompt:
     def run(self, initial_prompt: str | None = None, *args):
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
-        TODO: given cli args, change program behavior
         """
-        # todo: greeting here
         greeting()
 
         while True:
