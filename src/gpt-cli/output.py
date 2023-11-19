@@ -1,5 +1,6 @@
 from typing import Optional
 
+from rich.style import Style
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.text import Text
@@ -17,7 +18,7 @@ from terminal import *
 # })
 
 
-def md_theme(text_color: str):
+def md_theme(text_color: Style):
     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
@@ -27,7 +28,7 @@ class Output:
     Keeps track of how many lines are printed to the screen and pretty-prints everything.
     """
 
-    def __init__(self, color, theme):
+    def __init__(self, color: Style, theme):
         self.full_response = ""
         self.terminal_width = TERM_WIDTH
 
@@ -41,7 +42,7 @@ class Output:
             console=self._console,
             refresh_per_second=8,
             auto_refresh=False,
-            vertical_overflow="visible",
+            vertical_overflow="ellipsis",
         )
         self.live.__enter__()
         return self
@@ -54,7 +55,11 @@ class Output:
         self.full_response += text
         if markdown:
             self.live.update(
-                Markdown(self.full_response, code_theme=self.theme, style=self.color),
+                Markdown(
+                    self.full_response,
+                    # code_theme=self.theme,
+                    style=self.color,
+                ),
                 refresh=True,
             )
         else:

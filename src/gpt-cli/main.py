@@ -18,7 +18,7 @@ from prompt import Prompt
 # integrate typer as the frontend:
 #   - replace all prompt-toolkit and hardcoded keyboard actions into typer, or maybe just wrap startup functionality with
 #     typer and keep in-app keyboard interactions the same
-app = typer.Typer(name='gpt-cli')
+app = typer.Typer(name="gpt-cli")
 
 
 def validate_code_styles(value: str):

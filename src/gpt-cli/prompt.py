@@ -8,7 +8,9 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.styles import Style
+
+# from prompt_toolkit.styles import Style
+from rich.style import Style
 from rich.console import Console
 from tiktoken import encoding_for_model
 
@@ -60,7 +62,7 @@ class Prompt:
         )
         self.bindings = KeyBindings()
 
-        self.color = text_color
+        self.color = Style.parse(text_color)
         self.theme = code_theme
 
         # lookup table to run functions on certain prompts (if user presses enter)
