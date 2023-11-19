@@ -18,7 +18,11 @@ from terminal import *
 # })
 
 
-def md_theme(text_color: Style):
+def md_theme(text_color: str):
+    """
+    Overrides Rich's default text theme with Rich tokens.
+    Instead of a string, this func could accept a Rich.styles.Style obj
+    """
     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
@@ -28,14 +32,14 @@ class Output:
     Keeps track of how many lines are printed to the screen and pretty-prints everything.
     """
 
-    def __init__(self, color: Style, theme):
+    def __init__(self, color: str, theme):
         self.full_response = ""
         self.terminal_width = TERM_WIDTH
 
         self._console = Console(width=self.terminal_width, theme=md_theme(color))
         self.live: Optional[Live] = None
         self.color = color  # color of normal text
-        self.theme = theme
+        self.pygments_code_theme = theme
 
     def __enter__(self) -> "Output":
         self.live = Live(
@@ -57,7 +61,7 @@ class Output:
             self.live.update(
                 Markdown(
                     self.full_response,
-                    # code_theme=self.theme,
+                    code_theme=self.pygments_code_theme,
                     style=self.color,
                 ),
                 refresh=True,

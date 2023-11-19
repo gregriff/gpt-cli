@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Callable, Generator
+from typing import Callable
 
 from openai import OpenAI, APIConnectionError, Stream
 from openai.types.chat import ChatCompletionChunk
@@ -9,7 +9,6 @@ from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 
-# from prompt_toolkit.styles import Style
 from rich.style import Style
 from rich.console import Console
 from tiktoken import encoding_for_model
@@ -106,6 +105,9 @@ class Prompt:
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         TODO: given cli args, change program behavior
         """
+        # todo: greeting here
+        greeting()
+
         while True:
             try:
                 user_input: str = (

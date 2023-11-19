@@ -5,7 +5,6 @@ import typer
 from pygments import styles
 
 from config import CONFIG, default_system_message, prompt_arguments
-from terminal import greeting
 from prompt import Prompt
 
 # TODO: update screen rendering so that updates to not mess with auto-scrolling relating to terminal height:
@@ -24,17 +23,18 @@ app = typer.Typer(name="gpt-cli")
 def validate_code_styles(value: str):
     if value not in (valid_styles := list(styles.get_all_styles())):
         raise typer.BadParameter(f"{value} \n\nChoose from {valid_styles}")
+    return value
 
 
-code_styles = tuple(styles.get_all_styles())
-CodeStyles = Enum("code styles", code_styles)
+# code_styles = tuple(styles.get_all_styles())
+# CodeStyles = Enum("code styles", code_styles)
 
 
 @app.command()
 def main(
     prompt: Annotated[str, typer.Argument()] = None,
     system_message: Optional[str] = default_system_message["content"],
-    code_style: Annotated[
+    code_theme: Annotated[
         Optional[str], typer.Option(callback=validate_code_styles)
     ] = "native",
     # code_style: CodeStyles = CodeStyles.native,
@@ -53,20 +53,15 @@ def main(
 
     default_system_message["content"] = system_message
 
-    greeting()
     # stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(
-        text_color, code_style, default_system_message, api_key, prompt_arguments
+        text_color, code_theme, default_system_message, api_key, prompt_arguments
     )
     _prompt.run(prompt)
 
 
 if __name__ == "__main__":
-    # typer.run(main)
     app()
 
 # long term todos:
 # - menu commands in bottom toolbar. fullpage settings menu
-# - asyncio used to implement multiple prompts at once. Bottom menu bar would allow user
-#   to switch between tabs, giving them a notification when a response on a background tab has completed
-#       - could also dive really deep into rich and try to render markdown in real time while waiting for network io

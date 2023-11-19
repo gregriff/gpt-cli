@@ -2,6 +2,7 @@ openai
 prompt_toolkit
 tiktoken
 typer[all]
+Pygments==2.17.1
 
 # dev
 black
