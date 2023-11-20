@@ -171,10 +171,12 @@ class Prompt:
         self.count = 0
 
     def change_system_msg(self) -> None:
-        prompt = input(f"\n{BOLD + RED}new system message:\n{CYAN}> ")
+        prompt = input(f"\n{BOLD + RED} new system message:\n{CYAN} > ")
         new_message = prompt.casefold().strip()
         self.system_message["content"] = new_message
-        print(BOLD + YELLOW, f'\nsystem message set to: "{new_message}"', sep="")
+        self.console.print(
+            f'\nsystem message set to: "{new_message}"', style="dim bold yellow"
+        )
         self.clear_history(auto=True)
 
     def change_temp(self):
@@ -185,7 +187,7 @@ class Prompt:
             reply = f'\ntemperature set to: "{new_temp}"'
         else:
             reply = f"\ninvalid temperature: {new_temp}, must be 0 < temp < 1"
-        print(BOLD + YELLOW, reply, "\n", sep="")
+        self.console.print(reply, style="dim bold yellow")
 
     def num_tokens(self) -> int:
         """
@@ -219,13 +221,3 @@ def exit_program(console: Console, total_cost: int):
     )
     exit(0)
     # TODO: use token algo to print total tokens in session
-
-    # TODO: need to manually wrap this open_settings function
-    # @self.bindings.add('c-n')
-    # def open_settings(event):
-    #     " Open settings menu/controls when `c-n` is pressed. "
-
-    # def print_hello():
-    #     print('hello world')
-    #
-    # run_in_terminal(print_hello)  # need this if still want to use prompt while hook is printing
