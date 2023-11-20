@@ -9,29 +9,31 @@ from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from rich import box
+from rich.columns import Columns
 from rich.panel import Panel
 
 from rich.style import Style
 from rich.console import Console
 from rich.text import Text
+from rich.theme import Theme
 from tiktoken import encoding_for_model
 
 from terminal import *
 from output import Output
 from costs import gpt_pricing
 
+
 # example_style = Style.from_dict({
 #     'toolbar': 'bg:#002b36'
 # })
 
 
-def bottom_toolbar(num_tokens: int, price: float):
-    total_price = num_tokens * price
-    return [("class:toolbar", f"Price: ${total_price:.3f}")]
-
-    # TODO: keep track of tokens with openai lib. Update program state with these and print to screen
-
-    # TODO: use prompt_toolkit to add a bottom bar and a fullscreen settings menu. Could use rich to print in there
+def md_theme(text_color: str):
+    """
+    Overrides Rich's default text theme with Rich tokens.
+    Instead of a string, this func could accept a Rich.styles.Style obj
+    """
+    return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
 class Prompt:
@@ -41,6 +43,7 @@ class Prompt:
         code_theme: str,
         sys_msg: dict,
         api_key: str,
+        refresh_rate: int,
         prompt_args: dict,
     ):
         self.system_message = sys_msg
@@ -56,9 +59,10 @@ class Prompt:
         self.price_per_token = gpt_pricing(self.model, prompt=True)
         self.total_cost = 0
         self.terminal_width = TERM_WIDTH
+        self.refresh_rate = refresh_rate
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
-        self.console = Console()
+        self.console = Console(width=TERM_WIDTH, theme=md_theme(text_color))
         self.prompt = HTML(
             "<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> "
         )
@@ -69,64 +73,40 @@ class Prompt:
 
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
-            **{
-                kw: exit_program
-                for kw in (
-                    "exit",
-                    "e",
-                    "q",
-                    "quit",
-                )
-            },
-            **{
-                kw: self.clear_history
-                for kw in (
-                    "c",
-                    "clear",
-                )
-            },
-            **{
-                kw: self.change_system_msg
-                for kw in (
-                    "sys",
-                    "system",
-                    "message",
-                )
-            },
-            **{
-                kw: self.change_temp
-                for kw in (
-                    "temp",
-                    "temperature",
-                )
-            }
-            # TODO: one func for opening settings menu, sqlite for maintaing settings
+            kw: function
+            for keywords, function in [
+                (
+                    ("exit", "e", "q", "quit"),
+                    partial(exit_program, self.console, self.total_cost),
+                ),
+                (("c", "clear"), self.clear_history),
+                (("sys", "system", "message"), self.change_system_msg),
+                (("temp", "temperature"), self.change_temp),
+            ]
+            for kw in keywords
         }
 
     def run(self, initial_prompt: str | None = None, *args):
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
-        greeting()
-
         system("clear")
-        help_text = Text(justify="center")
-        # help_text.append(f'{"openai" : <10}{"v" + version("openai") : <15}', style='orange')
-        help_text.append(
-            f'{"model" : <10}{prompt_arguments.get("model") : <15}', style="orange"
+        greeting_left = Text("gpt-cli", justify="left", style="dim bold blue")
+        greeting_right = Text(
+            f"{prompt_arguments.get('model')}", justify="right", style="dim bold blue"
         )
 
-        # print(CYAN)
-        # print("=*=" * 10, ORANGE)
-        # print(f'{"openai" : <10}{"v" + version("openai") : <15}')
-        # print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', RESET + CYAN)
-        # print("=*=" * 10, end="\n\n")
-
         # Create a panel with the help text, you can customize the box style
-        panel = Panel(help_text, box=box.ROUNDED, style="cyan")
+        columns = Columns([greeting_left, greeting_right], expand=True)
+        # combined_greeting = Text.assemble(greeting_left, greeting_right, justify='default')
+        # pre_title = Text(f'gpt-cli', style='bold blue')
+        # title = Text('gpt-cli', style='dim')
+        # greeting = Text(f'{prompt_arguments.get("model")}', style='bold blue')
+        panel = Panel(columns, box=box.ROUNDED, style="dim green", title_align="left")
 
         # Print the panel to the console
-        self.console.print(panel)
+        self.console.print(panel, end="")
+        self.console.print()
 
         while True:
             try:
@@ -134,21 +114,15 @@ class Prompt:
                     initial_prompt
                     if initial_prompt is not None
                     else self.session.prompt(self.prompt)
-                )
-                cleaned_input = user_input.casefold().strip()
+                ).strip()
+                cleaned_input = user_input.casefold()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
             except KeyboardInterrupt:
                 print()
                 continue
             except EOFError:  # ctrl + D
-                print(CLEAR_CURRENT_LINE)
-                system("clear")
-                self.console.print(
-                    f"total cost of last session: ${self.total_cost:.3f}",
-                    justify="right",
-                    style="dim",
-                )
+                exit_program(self.console, self.total_cost)
                 exit(0)
             finally:
                 initial_prompt = None
@@ -163,10 +137,12 @@ class Prompt:
                 messages=self.messages, **self.prompt_args
             )
         except APIConnectionError as e:
-            print(YELLOW, f"Could not connect to API. Error: {str(e)}\n")
+            self.console.print(
+                f"Could not connect to API. Error: {str(e)}\n", style="yellow"
+            )
             return
 
-        with Output(self.color, self.theme) as output:
+        with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
             for chunk in response_stream:
                 for choice in chunk.choices:
                     chunk_text = choice.delta.content or ""
@@ -183,9 +159,11 @@ class Prompt:
         self.count += 1
 
     def clear_history(self, auto=False) -> None:
-        print(RESET, BOLD, BLUE)
         if not auto or self.count:
-            print(f"history cleared: {self.count} messages total", "\n", RESET)
+            self.console.print(
+                f"\nhistory cleared: {self.count} messages total\n",
+                style="dim bold blue",
+            )
         self.total_cost += self.get_current_cost()
         self.messages = [
             self.system_message,
@@ -231,11 +209,16 @@ class Prompt:
         return self.num_tokens() * self.price_per_token
 
 
-def exit_program():
-    # TODO: use token algo to print total tokens in session
+def exit_program(console: Console, total_cost: int):
     print(CLEAR_CURRENT_LINE)
     system("clear")
+    console.print(
+        f"total cost of last session: ${total_cost:.3f}",
+        justify="right",
+        style="dim",
+    )
     exit(0)
+    # TODO: use token algo to print total tokens in session
 
     # TODO: need to manually wrap this open_settings function
     # @self.bindings.add('c-n')

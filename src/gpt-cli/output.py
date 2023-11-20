@@ -1,8 +1,8 @@
 from typing import Optional
 
-from rich.style import Style
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.style import Style
 from rich.text import Text
 from rich.theme import Theme
 from rich.live import Live
@@ -32,19 +32,20 @@ class Output:
     Keeps track of how many lines are printed to the screen and pretty-prints everything.
     """
 
-    def __init__(self, color: str, theme):
+    def __init__(self, console: Console, color: Style, theme, refresh_rate: int):
         self.full_response = ""
         self.terminal_width = TERM_WIDTH
 
-        self._console = Console(width=self.terminal_width, theme=md_theme(color))
+        self.console = console
         self.live: Optional[Live] = None
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
+        self.refresh_rate = refresh_rate
 
     def __enter__(self) -> "Output":
         self.live = Live(
-            console=self._console,
-            refresh_per_second=8,
+            console=self.console,
+            refresh_per_second=self.refresh_rate,
             auto_refresh=False,
             vertical_overflow="ellipsis",
         )
@@ -53,7 +54,7 @@ class Output:
 
     def __exit__(self, *args):
         self.live.__exit__(*args)
-        self._console.print()
+        self.console.print()
 
     def print(self, text: str, markdown=True):
         self.full_response += text
@@ -67,7 +68,7 @@ class Output:
                 refresh=True,
             )
         else:
-            self._console.print(
+            self.console.print(
                 Text(
                     text,
                     style=self.color,

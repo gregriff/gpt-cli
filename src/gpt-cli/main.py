@@ -35,10 +35,14 @@ def main(
     prompt: Annotated[str, typer.Argument()] = None,
     system_message: Optional[str] = default_system_message["content"],
     code_theme: Annotated[
-        Optional[str], typer.Option(callback=validate_code_styles)
+        Optional[str],
+        typer.Option(callback=validate_code_styles, help="Any Pygments `code_theme`"),
     ] = "native",
     # code_style: CodeStyles = CodeStyles.native,
     text_color: Annotated[str, typer.Option()] = "green",
+    refresh_rate: Annotated[
+        int, typer.Option(help="Printing frequency from response buffer in Hz")
+    ] = 8,
 ):
     # TODO: use a cli lib to parse args for one time run of app (dont save settings) with custom:
     #   - temp
@@ -55,7 +59,12 @@ def main(
 
     # stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(
-        text_color, code_theme, default_system_message, api_key, prompt_arguments
+        text_color.casefold(),
+        code_theme.casefold(),
+        default_system_message,
+        api_key,
+        int(refresh_rate),
+        prompt_arguments,
     )
     _prompt.run(prompt)
 
