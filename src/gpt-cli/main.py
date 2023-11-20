@@ -22,7 +22,13 @@ def validate_code_styles(value: str):
 
 @app.command()
 def main(
-    prompt: Annotated[str, Argument(help="Leave blank for REPL")] = None,
+    prompt: Annotated[
+        str,
+        Argument(
+            help="For pipe support (incomplete). Leave blank for fresh REPL",
+            metavar="[PROMPT]",
+        ),
+    ] = None,
     system_message: Annotated[
         Optional[str], Option(help="Influences all subsequent output from GPT")
     ] = default_system_message["content"],
@@ -35,10 +41,13 @@ def main(
     ] = "native",
     # code_style: CodeStyles = CodeStyles.native,
     text_color: Annotated[
-        str, Option(help="Color of plain text from response. Most colors supported")
+        str, Option(help="Color of plain text from responses. Most colors supported")
     ] = "green",
     refresh_rate: Annotated[
-        int, Option(help="Printing frequency from response buffer in Hz")
+        int,
+        Option(
+            "--refresh-rate", "-R", help="Printing frequency from response buffer in Hz"
+        ),
     ] = 8,
 ):
     api_key = CONFIG.get("lapetusAPIkey")
