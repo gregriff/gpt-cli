@@ -203,7 +203,7 @@ class Prompt:
                 assert isinstance(text, str)
                 num_tokens += len(encoding.encode(text))
                 if role == "name":  # if there's a name, the role is omitted
-                    num_tokens += -1  # role is always required and always 1 token
+                    num_tokens -= 1  # role is always required and always 1 token
         num_tokens += 2  # every reply is primed with <im_start>assistant
         return num_tokens
 
