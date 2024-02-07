@@ -63,8 +63,9 @@ class Prompt:
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
         self.console = Console(width=TERM_WIDTH, theme=md_theme(text_color))
+        self.prompt_lead = ">"
         self.prompt = HTML(
-            "<b><ansibrightyellow>?</ansibrightyellow></b> <b><ansibrightcyan>></ansibrightcyan></b> "
+            f"<b><ansibrightyellow>{self.prompt_lead}</ansibrightyellow></b> <b><ansibrightyellow>></ansibrightyellow></b> "
         )
         self.bindings = KeyBindings()
 
@@ -91,9 +92,9 @@ class Prompt:
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
         system("clear")
-        greeting_left = Text("gpt-cli", justify="left", style="dim bold blue")
+        greeting_left = Text("gpt-cli", justify="left", style="dim bold yellow")
         greeting_right = Text(
-            f"{prompt_arguments.get('model')}", justify="right", style="dim bold blue"
+            f"{prompt_arguments.get('model')}", justify="right", style="dim bold yellow"
         )
 
         # Create a panel with the help text, you can customize the box style
@@ -102,7 +103,7 @@ class Prompt:
         # pre_title = Text(f'gpt-cli', style='bold blue')
         # title = Text('gpt-cli', style='dim')
         # greeting = Text(f'{prompt_arguments.get("model")}', style='bold blue')
-        panel = Panel(columns, box=box.ROUNDED, style="dim green", title_align="left")
+        panel = Panel(columns, box=box.ROUNDED, style="dim blue", title_align="left")
 
         # Print the panel to the console
         self.console.print(panel, end="")
