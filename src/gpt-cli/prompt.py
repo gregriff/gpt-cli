@@ -63,9 +63,8 @@ class Prompt:
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
         self.console = Console(width=TERM_WIDTH, theme=md_theme(text_color))
-        self.prompt_lead = ">"
         self.prompt = HTML(
-            f"<b><ansibrightyellow>{self.prompt_lead}</ansibrightyellow></b> <b><ansibrightyellow>></ansibrightyellow></b> "
+            f"<b><ansicyan>?</ansicyan></b> <b><ansibrightyellow>></ansibrightyellow></b> "
         )
         self.bindings = KeyBindings()
 
