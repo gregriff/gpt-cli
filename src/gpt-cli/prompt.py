@@ -105,8 +105,7 @@ class Prompt:
         panel = Panel(columns, box=box.ROUNDED, style="dim blue", title_align="left")
 
         # Print the panel to the console
-        self.console.print(panel, end="")
-        self.console.print()
+        self.console.print(panel)
 
         while True:
             try:

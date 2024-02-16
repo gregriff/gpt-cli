@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Optional, Annotated
 
 from typer import Option, Typer, BadParameter, Argument
@@ -18,6 +17,19 @@ def validate_code_styles(value: str):
 
 # code_styles = tuple(styles.get_all_styles())
 # CodeStyles = Enum("code styles", code_styles)
+
+
+# TODO:
+#  - clean up these Annotated sections
+#  -
+#   save feature, use sqlite database:
+#  - META + S to save current chat, option to name it in bottom toolbar
+#  - `llm saved` to list saved chats with # prompts and summaries
+#  - `llm load [tag]` to load the saved chat history of chat [tag]
+#  - `llm delete [tag]`
+#  -
+#   long term todos:
+#   - menu commands in bottom toolbar
 
 
 @app.command()
@@ -68,6 +80,3 @@ def main(
 
 if __name__ == "__main__":
     app()
-
-# long term todos:
-# - menu commands in bottom toolbar. fullpage settings menu

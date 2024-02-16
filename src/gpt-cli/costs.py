@@ -24,7 +24,7 @@ GPT_4_TURBO_PRICE_PER_TOKEN = {
 def gpt_pricing(model: str, prompt: bool) -> Optional[float]:
     if model.startswith("gpt-4-32k"):
         pricing = GPT_4_32K_PRICE_PER_TOKEN
-    elif model.startswith("gpt-4-turbo"):
+    elif model.startswith("gpt-4-turbo") or model.startswith("gpt-4-"):
         pricing = GPT_4_TURBO_PRICE_PER_TOKEN
     elif model.startswith("gpt-4"):
         pricing = GPT_4_PRICE_PER_TOKEN
