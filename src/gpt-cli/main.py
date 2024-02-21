@@ -25,8 +25,11 @@ def validate_code_styles(value: str):
 #   save feature, use sqlite database:
 #  - META + S to save current chat, option to name it in bottom toolbar
 #  - `llm saved` to list saved chats with # prompts and summaries
-#  - `llm load [tag]` to load the saved chat history of chat [tag]
+#  - `llm load [tag]` to load the saved chat history of chat [tag], will have to remember which model as well
 #  - `llm delete [tag]`
+#  - `llm update` fetches updated models from sources
+#  - `llm list` lists available models
+#  - `llm -m[--model] [model_name]` use specified model for this session
 #  -
 #   long term todos:
 #   - menu commands in bottom toolbar

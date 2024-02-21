@@ -1,10 +1,7 @@
 import sys
 from json import load
-from os import path, chdir
+from os import path
 
-# script_dir = path.dirname(path.abspath(sys.argv[0]))
-# chdir(script_dir)
-# env_file = path.abspath('../../env.json')
 env_file = path.join(sys.path[0], "../../env.json")
 
 with open(env_file) as file:

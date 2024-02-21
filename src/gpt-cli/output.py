@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.style import Style
 from rich.text import Text
-from rich.theme import Theme
+# from rich.theme import Theme
 from rich.live import Live
 
 from terminal import *
@@ -18,12 +18,12 @@ from terminal import *
 # })
 
 
-def md_theme(text_color: str):
-    """
-    Overrides Rich's default text theme with Rich tokens.
-    Instead of a string, this func could accept a Rich.styles.Style obj
-    """
-    return Theme({"markdown": text_color, "markdown.code": "bold blue"})
+# def md_theme(text_color: str):
+#     """
+#     Overrides Rich's default text theme with Rich tokens.
+#     Instead of a string, this func could accept a Rich.styles.Style obj
+#     """
+#     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
 class Output:
