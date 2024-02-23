@@ -27,9 +27,13 @@ def validate_code_styles(value: str):
 #  - `llm saved` to list saved chats with # prompts and summaries
 #  - `llm load [tag]` to load the saved chat history of chat [tag], will have to remember which model as well
 #  - `llm delete [tag]`
+#  -
+#  CLI features
 #  - `llm update` fetches updated models from sources
 #  - `llm list` lists available models
 #  - `llm -m[--model] [model_name]` use specified model for this session
+#  - instructions for keyboard shortcuts in help menu
+#  - pipe support. research how to capture stdin as soon as app starts, --pipe option to output raw response and quit
 #  -
 #   long term todos:
 #   - menu commands in bottom toolbar
@@ -65,7 +69,7 @@ def main(
         ),
     ] = 8,
 ):
-    api_key = CONFIG.get("lapetusAPIkey")
+    api_key = CONFIG.get("apiKey")
 
     default_system_message["content"] = system_message
 
