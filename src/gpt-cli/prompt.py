@@ -1,4 +1,5 @@
 from functools import partial
+from os import system
 from typing import Callable
 
 from openai import OpenAI, APIConnectionError, Stream
@@ -21,6 +22,7 @@ from tiktoken import encoding_for_model
 from terminal import *
 from output import Output
 from costs import gpt_pricing
+from config import prompt_arguments
 
 
 # example_style = Style.from_dict({

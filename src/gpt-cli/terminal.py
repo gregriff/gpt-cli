@@ -1,8 +1,4 @@
-from importlib.metadata import version
-from os import system
 from shutil import get_terminal_size
-
-from config import prompt_arguments
 
 RED = "\033[1;31m"
 BLUE = "\033[1;34m"
@@ -20,14 +16,3 @@ MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS = "\033[F"
 CLEAR_LINE_ABOVE_CURRENT = "\033[F\033[K"
 
 TERM_WIDTH = get_terminal_size().columns
-
-
-def greeting():
-    system("clear")
-    # console.print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', style='encircle')
-
-    print(CYAN)
-    print("=*=" * 10, ORANGE)
-    print(f'{"openai" : <10}{"v" + version("openai") : <15}')
-    print(f'{"model" : <10}{prompt_arguments.get("model") : <15}', RESET + CYAN)
-    print("=*=" * 10, end="\n\n")

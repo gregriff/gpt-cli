@@ -4,7 +4,6 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.style import Style
 from rich.text import Text
-# from rich.theme import Theme
 from rich.live import Live
 
 from terminal import *

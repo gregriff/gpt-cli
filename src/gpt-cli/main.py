@@ -44,7 +44,7 @@ def main(
     prompt: Annotated[
         str,
         Argument(
-            help="For pipe support (incomplete). Leave blank for fresh REPL",
+            help="Quoted text to prompt LLM. Leave blank for fresh REPL",
             metavar="[PROMPT]",
         ),
     ] = None,
