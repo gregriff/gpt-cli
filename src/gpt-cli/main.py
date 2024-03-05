@@ -20,7 +20,6 @@ def validate_code_styles(value: str):
 
 
 # TODO:
-#  - clean up these Annotated sections
 #  -
 #   save feature, use sqlite database:
 #  - META + S to save current chat, option to name it in bottom toolbar
@@ -38,42 +37,21 @@ def validate_code_styles(value: str):
 #   long term todos:
 #   - menu commands in bottom toolbar
 
+# fmt: off
 
 @app.command()
 def main(
-    prompt: Annotated[
-        str,
-        Argument(
-            help="Quoted text to prompt LLM. Leave blank for fresh REPL",
-            metavar="[PROMPT]",
-        ),
-    ] = None,
-    system_message: Annotated[
-        Optional[str], Option(help="Influences all subsequent output from GPT")
-    ] = default_system_message["content"],
-    code_theme: Annotated[
-        Optional[str],
-        Option(
-            callback=validate_code_styles,
-            help="Style of Markdown code blocks. Any Pygments `code_theme`",
-        ),
-    ] = "native",
-    # code_style: CodeStyles = CodeStyles.native,
-    text_color: Annotated[
-        str, Option(help="Color of plain text from responses. Most colors supported")
-    ] = "green",
-    refresh_rate: Annotated[
-        int,
-        Option(
-            "--refresh-rate", "-R", help="Printing frequency from response buffer in Hz"
-        ),
-    ] = 8,
+    prompt: Annotated[str, Argument(help="Quoted text to prompt LLM. Leave blank for fresh REPL", metavar="[PROMPT]")] = None,
+    system_message: Annotated[Optional[str], Option(help="Influences all subsequent output from GPT")] = default_system_message["content"],
+    code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = "native",
+    text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
+    refresh_rate: Annotated[int,Option("--refresh-rate", "-R", help="Printing frequency from response buffer in Hz")] = 8,
 ):
     api_key = CONFIG.get("apiKey")
 
     default_system_message["content"] = system_message
 
-    # stata-dark. dracula. native. inkpot. vim.
+    # cool themes: stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(
         text_color.casefold(),
         code_theme.casefold(),
@@ -83,6 +61,8 @@ def main(
         prompt_arguments,
     )
     _prompt.run(prompt)
+
+# fmt: on
 
 
 if __name__ == "__main__":

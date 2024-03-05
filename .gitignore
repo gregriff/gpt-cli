@@ -11,3 +11,4 @@ geckodriver.log
 *.DS_Store
 .DS_Store
 .zed/
+.vscode

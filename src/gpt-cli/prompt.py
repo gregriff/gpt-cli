@@ -100,13 +100,7 @@ class Prompt:
 
         # Create a panel with the help text, you can customize the box style
         columns = Columns([greeting_left, greeting_right], expand=True)
-        # combined_greeting = Text.assemble(greeting_left, greeting_right, justify='default')
-        # pre_title = Text(f'gpt-cli', style='bold blue')
-        # title = Text('gpt-cli', style='dim')
-        # greeting = Text(f'{prompt_arguments.get("model")}', style='bold blue')
         panel = Panel(columns, box=box.ROUNDED, style="dim blue", title_align="left")
-
-        # Print the panel to the console
         self.console.print(panel)
 
         while True:
@@ -129,19 +123,17 @@ class Prompt:
                 initial_prompt = None
 
     def prompt_llm(self, user_input: str):
+        # fmt: off
         print(RESET)
         self.messages.append({"role": "user", "content": user_input})
         try:
-            response_stream: Stream[
-                ChatCompletionChunk
-            ] = self.client.chat.completions.create(
+            response_stream: Stream[ChatCompletionChunk] = self.client.chat.completions.create(
                 messages=self.messages, **self.prompt_args
             )
         except APIConnectionError as e:
-            self.console.print(
-                f"Could not connect to API. Error: {str(e)}\n", style="yellow"
-            )
+            self.console.print(f"Could not connect to API. Error: {str(e)}\n", style="yellow")
             return
+        # fmt: on
 
         with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
             for chunk in response_stream:
@@ -221,4 +213,3 @@ def exit_program(console: Console, total_cost: int):
         style="dim",
     )
     exit(0)
-    # TODO: use token algo to print total tokens in session

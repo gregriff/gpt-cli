@@ -13,7 +13,7 @@ Now a staple in my daily workflow as a rubber duck debugger, I have found this C
 
 Developed on MacOS and Ubuntu. All instructions will assume a *nix machine with Python 3.11+ installed. 
 
-**An OpenAI API key is required. You must place it in a file called `env.json` in the project root directory. Ex.**
+**An OpenAI API key is required (sign up [here](https://platform.openai.com/account/api-keys)). You must place it in a file called `env.json` in the project root directory. Ex.**
 
 ```json
 {
@@ -61,7 +61,7 @@ The pricing for the turbo models is very [cheap](https://openai.com/pricing), an
 For clarity, OpenAI bills you on tokens per request, and the entire chat history of prompts and responses are sent in each request. As long as you remember to clear your history after a few prompts you will be fine. 
 If you are worried, set a usage limit on your OpenAI [account.](https://platform.openai.com/login/)
 
-If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki)
+If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). This is the difference between this project and [elia](https://github.com/darrenburns/elia).
 
 ## Development
 
@@ -73,6 +73,7 @@ Feature requests are more than welcome, however I will probably take a while to 
 
 - Save/load chat histories from sqlite DB
 - Support for other LLMs if any seem worth adding
+- Incorporate cutting-edge tooling like [uv](https://github.com/astral-sh/uv) and [Ruff](https://github.com/astral-sh/ruff). 
 
 ## Notable References
 
