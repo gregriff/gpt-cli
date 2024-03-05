@@ -1,5 +1,7 @@
+import sys
 from functools import partial
 from os import system
+from termios import tcflush, TCIFLUSH
 from typing import Callable
 
 from openai import OpenAI, APIConnectionError, Stream
@@ -121,6 +123,7 @@ class Prompt:
                 exit(0)
             finally:
                 initial_prompt = None
+                tcflush(sys.stdin, TCIFLUSH)  # discard any user input while response was printing
 
     def prompt_llm(self, user_input: str):
         # fmt: off
