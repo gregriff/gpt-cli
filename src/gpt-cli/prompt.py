@@ -4,7 +4,8 @@ from os import system
 from termios import tcflush, TCIFLUSH
 from typing import Callable
 
-from openai import OpenAI, APIConnectionError, Stream
+from anthropic.types import Message
+from openai import OpenAI, Stream, OpenAIError
 from openai.types.chat import ChatCompletionChunk
 
 from prompt_toolkit import PromptSession
@@ -20,11 +21,11 @@ from rich.console import Console
 from rich.text import Text
 from rich.theme import Theme
 from tiktoken import encoding_for_model
-
+from anthropic import Anthropic, AnthropicError
 from terminal import *
 from output import Output
 from costs import gpt_pricing
-from config import prompt_arguments
+from config import prompt_arguments, CONFIG, openai_models
 
 
 # example_style = Style.from_dict({
@@ -40,24 +41,35 @@ def md_theme(text_color: str):
     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
 
 
+openai_apikey = CONFIG.get("openaiAPIKey")
+anthropic_apikey = CONFIG.get("anthropicAPIKey")
+
+
 class Prompt:
     def __init__(
         self,
         text_color: str,
         code_theme: str,
         sys_msg: dict,
-        api_key: str,
         refresh_rate: int,
         prompt_args: dict,
     ):
         self.system_message = sys_msg
-        self.client = OpenAI(api_key=api_key)
         self.prompt_args = prompt_args
         self.model = prompt_args["model"]
+        self.client = (
+            OpenAI(api_key=openai_apikey)
+            if self.model in openai_models
+            else Anthropic(api_key=anthropic_apikey)
+        )
 
-        self.messages = [
-            sys_msg,
-        ]
+        self.messages = (
+            [
+                sys_msg,
+            ]
+            if isinstance(self.client, OpenAI)
+            else []
+        )
         self.count = 0
         self.tokens = 0
         self.price_per_token = gpt_pricing(self.model, prompt=True)
@@ -105,6 +117,11 @@ class Prompt:
         panel = Panel(columns, box=box.ROUNDED, style="dim blue", title_align="left")
         self.console.print(panel)
 
+        # TODO: once OOP refactor is done, fix this
+        if isinstance(self.client, OpenAI):
+            # stream = True
+            self.prompt_args.update(temperature=0.7)
+
         while True:
             try:
                 user_input: str = (
@@ -123,26 +140,43 @@ class Prompt:
                 exit(0)
             finally:
                 initial_prompt = None
-                tcflush(sys.stdin, TCIFLUSH)  # discard any user input while response was printing
+                tcflush(
+                    sys.stdin, TCIFLUSH
+                )  # discard any user input while response was printing
 
     def prompt_llm(self, user_input: str):
         # fmt: off
         print(RESET)
         self.messages.append({"role": "user", "content": user_input})
         try:
-            response_stream: Stream[ChatCompletionChunk] = self.client.chat.completions.create(
-                messages=self.messages, **self.prompt_args
-            )
-        except APIConnectionError as e:
-            self.console.print(f"Could not connect to API. Error: {str(e)}\n", style="yellow")
+            if isinstance(self.client, OpenAI):
+                response_stream: Stream[ChatCompletionChunk] = self.client.chat.completions.create(
+                    messages=self.messages, **self.prompt_args
+                )
+            else:
+                response_stream: Message = self.client.messages.create(
+                    messages=self.messages, **self.prompt_args
+                )
+        except (OpenAIError, AnthropicError) as e:
+            self.console.print(f"API Error: {str(e)}\n", style="yellow")
             return
         # fmt: on
 
+        # TODO: refactor with OOP, handle this
         with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
-            for chunk in response_stream:
-                for choice in chunk.choices:
-                    chunk_text = choice.delta.content or ""
-                    output.print(chunk_text)
+            if isinstance(self.client, OpenAI):
+                for chunk in response_stream:
+                    for choice in chunk.choices:
+                        chunk_text = choice.delta.content or ""
+                        output.print(chunk_text)
+            else:
+                # with self.client.messages.stream(
+                #     messages=self.messages, **self.prompt_args
+                # ) as stream:
+                #     for text in stream.text_stream:
+                #         output.print(text)
+                for event in response_stream:
+                    output.print(str(event))
 
         self.messages.append({"role": "assistant", "content": output.full_response})
 
