@@ -33,6 +33,10 @@ def validate_llm_model(value: str):
 #  - BETTER ERROR HANDLING from API docs
 #  -
 #  CLI features
+#  - one word for argv[2] needs to be treated as an argument and not a prompt
+#  - more commands:
+#  - argv[2] command alias for models ex. `llm opus`:
+#       impl this by hardcoding aliases, then searching model keys for the alias substring
 #  - `llm update` fetches updated models from sources
 #  - `llm list` lists available models
 #  - `llm -m[--model] [model_name]` use specified model for this session
