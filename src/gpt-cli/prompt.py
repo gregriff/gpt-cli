@@ -21,7 +21,7 @@ from rich.console import Console
 from rich.text import Text
 from rich.theme import Theme
 from tiktoken import encoding_for_model
-from anthropic import Anthropic, AnthropicError
+from anthropic import Anthropic, AnthropicError, MessageStreamManager
 from terminal import *
 from output import Output
 from costs import gpt_pricing
@@ -120,7 +120,7 @@ class Prompt:
         # TODO: once OOP refactor is done, fix this
         if isinstance(self.client, OpenAI):
             # stream = True
-            self.prompt_args.update(temperature=0.7)
+            self.prompt_args.update(temperature=0.7, stream=True)
 
         while True:
             try:
@@ -141,7 +141,9 @@ class Prompt:
             finally:
                 initial_prompt = None
                 if not sys.stdin.closed:
-                    tcflush(sys.stdin, TCIFLUSH)  # discard any user input while response was printing
+                    tcflush(
+                        sys.stdin, TCIFLUSH
+                    )  # discard any user input while response was printing
 
     def prompt_llm(self, user_input: str):
         # fmt: off
@@ -153,7 +155,7 @@ class Prompt:
                     messages=self.messages, **self.prompt_args
                 )
             else:
-                response_stream: Message = self.client.messages.create(
+                response_stream: MessageStreamManager = self.client.messages.stream(
                     messages=self.messages, **self.prompt_args
                 )
         except (OpenAIError, AnthropicError) as e:
@@ -166,16 +168,13 @@ class Prompt:
             if isinstance(self.client, OpenAI):
                 for chunk in response_stream:
                     for choice in chunk.choices:
-                        chunk_text = choice.delta.content or ""
-                        output.print(chunk_text)
+                        if chunk_text := choice.delta.content:
+                            output.print(chunk_text)
+
             else:
-                # with self.client.messages.stream(
-                #     messages=self.messages, **self.prompt_args
-                # ) as stream:
-                #     for text in stream.text_stream:
-                #         output.print(text)
-                for event in response_stream:
-                    output.print(str(event))
+                with response_stream as stream:
+                    for text in stream.text_stream:
+                        output.print(text)
 
         self.messages.append({"role": "assistant", "content": output.full_response})
 
@@ -223,7 +222,10 @@ class Prompt:
         Get the total number of tokens used in the current chat history given OpenAI's token
         counting package `tiktoken`
         """
-        encoding = encoding_for_model(self.prompt_args["model"])
+        model = self.prompt_args["model"]
+        if "claude" in model:
+            return 0
+        encoding = encoding_for_model(model)
         num_tokens = 0
         for message in self.messages:
             # every message follows <im_start>{role/name}\n{content}<im_end>\n

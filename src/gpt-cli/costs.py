@@ -20,6 +20,21 @@ GPT_4_TURBO_PRICE_PER_TOKEN = {
     "response": 0.03 / 1000,
 }
 
+CLAUDE_3_OPUS_PRICING = {
+    "prompt": 15.0 / 1_000_000,
+    "response": 75.0 / 1_000_000,
+}
+
+CLAUDE_3_SONNET_PRICING = {
+    "prompt": 3.0 / 1_000_000,
+    "response": 15.0 / 1_000_000,
+}
+
+CLAUDE_3_HAIKU_PRICING = {
+    "prompt": 0.25 / 1_000_000,
+    "response": 1.25 / 1_000_000,
+}
+
 
 def gpt_pricing(model: str, prompt: bool) -> Optional[float]:
     if model.startswith("gpt-4-32k"):
@@ -29,5 +44,5 @@ def gpt_pricing(model: str, prompt: bool) -> Optional[float]:
     elif model.startswith("gpt-4"):
         pricing = GPT_4_PRICE_PER_TOKEN
     else:
-        return None
+        return 0
     return pricing["prompt" if prompt else "response"]

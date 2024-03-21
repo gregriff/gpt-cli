@@ -8,7 +8,7 @@ with open(env_file) as file:
     CONFIG: dict = load(file)
 
 prompt_arguments = {
-    "stream": True,
+    # "stream": True,
     # "temperature": 0.7,
     "max_tokens": 1000,
 }
@@ -24,4 +24,6 @@ openai_models = [
 
 anthropic_models = [
     "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
 ]

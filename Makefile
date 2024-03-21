@@ -18,5 +18,8 @@ install:
 run:
 	python src/gpt-cli/main.py
 
+run-claude:
+	python src/gpt-cli/main.py -m "claude-3-haiku-20240307"
+
 format:
 	python -m black -t py312 .
