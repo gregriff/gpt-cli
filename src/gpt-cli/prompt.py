@@ -118,12 +118,15 @@ class Prompt:
             except KeyboardInterrupt:
                 print()
                 continue
+            # TODO: this does not do anything while response is streaming...
             except EOFError:  # ctrl + D
                 exit_program(self.console, self.total_cost)
-                exit(0)
             finally:
                 initial_prompt = None
-                tcflush(sys.stdin, TCIFLUSH)  # discard any user input while response was printing
+                if not sys.stdin.closed:
+                    tcflush(
+                        sys.stdin, TCIFLUSH
+                    )  # discard any user input while response was printing
 
     def prompt_llm(self, user_input: str):
         # fmt: off

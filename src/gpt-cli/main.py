@@ -21,12 +21,6 @@ def validate_code_styles(value: str):
 
 # TODO:
 #  -
-#   save feature, use sqlite database:
-#  - META + S to save current chat, option to name it in bottom toolbar
-#  - `llm saved` to list saved chats with # prompts and summaries
-#  - `llm load [tag]` to load the saved chat history of chat [tag], will have to remember which model as well
-#  - `llm delete [tag]`
-#  -
 #  CLI features
 #  - `llm update` fetches updated models from sources
 #  - `llm list` lists available models
@@ -35,6 +29,7 @@ def validate_code_styles(value: str):
 #  - pipe support. research how to capture stdin as soon as app starts, --pipe option to output raw response and quit
 #  -
 #   long term todos:
+#   - DOCKER BUILD, ruff, uv, pipx?
 #   - menu commands in bottom toolbar
 
 # fmt: off

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Emulates the basic features of the ChatGPT UI. Main features include markdown rendering, live updates as chunked responses come in, ability to clear chat history, and control of GPT settings via command line arguments.
+The basic features of the ChatGPT web interface, in a terminal!. Includes markdown rendering, streamed responses, ability to clear chat history, and control of GPT settings via command line arguments.
 
 I created this out of curiosity of CLI development and because of the lack of free and convenient interfaces to GPT-4.
 Now a staple in my daily workflow as a rubber duck debugger, I have found this CLI works great in a terminal tab within one's IDE.
@@ -58,7 +58,7 @@ I recommend doing this whenever you want to ask the model a different line of qu
 Speaking of usage bill, once your current conversation costs more than a cent or two, it will be shown at the end of the response so that you know how much you're spending. Total session cost will also be shown when the program exits.
 
 The pricing for the turbo models is very [cheap](https://openai.com/pricing), and I use the official [tokenizer](https://github.com/openai/tiktoken) to count the tokens, so it should be accurate. 
-For clarity, OpenAI bills you on tokens per request, and the entire chat history of prompts and responses are sent in each request. As long as you remember to clear your history after a few prompts you will be fine. 
+For clarity, OpenAI bills you on tokens per request AND response, and the entire chat history of previous prompts and responses are sent in EACH request. As long as you remember to clear your history after a few prompts you will be fine. 
 If you are worried, set a usage limit on your OpenAI [account.](https://platform.openai.com/login/)
 
 If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). This is the difference between this project and [elia](https://github.com/darrenburns/elia).
@@ -71,7 +71,6 @@ Feature requests are more than welcome, however I will probably take a while to 
 
 ##### Planned Features:
 
-- Save/load chat histories from sqlite DB
 - Support for other LLMs if any seem worth adding
 - Incorporate cutting-edge tooling like [uv](https://github.com/astral-sh/uv) and [Ruff](https://github.com/astral-sh/ruff). 
 
