@@ -1,6 +1,7 @@
 
 # turns requirements.in into the lockfile requirements.txt
 # requires a venv to be active in order to use `pip-compile`
+# this should only be used by a developer updating the lockfile
 lock:
 	chmod +x ./scripts/activate_venv.sh; ./scripts/activate_venv.sh && \
 	python -m pip install -U pip pip-tools && \
