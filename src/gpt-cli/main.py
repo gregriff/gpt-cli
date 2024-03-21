@@ -5,11 +5,13 @@ from pygments import styles
 
 from config import (
     default_system_message,
-    prompt_arguments,
-    anthropic_models,
-    openai_models,
+    CONFIG,
 )
 from prompt import Prompt
+from models import OpenAIModel, AnthropicModel, anthropic_models, openai_models
+
+openai_apikey = CONFIG.get("openaiAPIKey")
+anthropic_apikey = CONFIG.get("anthropicAPIKey")
 
 app = Typer(name="gpt-cli", add_completion=False)
 
@@ -27,13 +29,8 @@ def validate_llm_model(value: str):
     return value
 
 
-# code_styles = tuple(styles.get_all_styles())
-# CodeStyles = Enum("code styles", code_styles)
-
-
 # TODO:
-#  - BETTER ERROR HANDLING
-#  - refactor models into a class structure
+#  - BETTER ERROR HANDLING from API docs
 #  -
 #  CLI features
 #  - `llm update` fetches updated models from sources
@@ -45,8 +42,8 @@ def validate_llm_model(value: str):
 #   long term todos:
 #   - DOCKER BUILD, ruff, uv, pipx?
 #   - menu commands in bottom toolbar
-
 # fmt: off
+
 
 @app.command()
 def main(
@@ -57,16 +54,17 @@ def main(
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
     refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="Printing frequency from response buffer in Hz")] = 8,
 ):
-    default_system_message["content"] = system_message
-    prompt_arguments["model"] = model
+    if model in openai_models:
+        llm = OpenAIModel(name=model, api_key=openai_apikey, system_message=system_message)
+    else:
+        llm = AnthropicModel(name=model, api_key=anthropic_apikey)
 
     # cool themes: stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(
+        llm,
         text_color.casefold(),
         code_theme.casefold(),
-        default_system_message,
         int(refresh_rate),
-        prompt_arguments,
     )
     _prompt.run(prompt)
 
