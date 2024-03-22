@@ -23,14 +23,14 @@ def validate_code_styles(value: str):
 
 
 def validate_llm_model(value: str):
-    valid_models = openai_models + anthropic_models
-    if value not in valid_models:
+    if value not in (valid_models := openai_models + anthropic_models):
         raise BadParameter(f"{value} \n\nChoose from {valid_models}")
     return value
 
 
 # TODO:
 #  - BETTER ERROR HANDLING from API docs
+#  - FIX PRICING
 #  -
 #  CLI features
 #  - one word for argv[2] needs to be treated as an argument and not a prompt
@@ -58,6 +58,7 @@ def main(
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
     refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="Printing frequency from response buffer in Hz")] = 8,
 ):
+    # TODO: make this a factory given the model name
     if model in openai_models:
         llm = OpenAIModel(name=model, api_key=openai_apikey, system_message=system_message)
     else:

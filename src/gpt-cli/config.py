@@ -2,8 +2,6 @@ import sys
 from json import load
 from os import path
 
-from models import MODELS_AND_PRICES
-
 env_file = path.join(sys.path[0], "../../env.json")
 
 with open(env_file) as file:

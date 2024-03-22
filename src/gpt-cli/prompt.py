@@ -17,19 +17,11 @@ from rich.panel import Panel
 from rich.style import Style
 from rich.console import Console
 from rich.text import Text
-from rich.theme import Theme
 from anthropic import AnthropicError
 from terminal import *
 from output import Output
 from models import LLM
-
-
-def md_theme(text_color: str):
-    """
-    Overrides Rich's default text theme with Rich tokens.
-    Instead of a string, this func could accept a Rich.styles.Style obj
-    """
-    return Theme({"markdown": text_color, "markdown.code": "bold blue"})
+from styling import *
 
 
 class Prompt:
@@ -61,32 +53,30 @@ class Prompt:
         self.special_case_functions: dict[str, Callable] = {
             kw: function
             for keywords, function in [
-                (
-                    ("exit", "e", "q", "quit"),
-                    partial(exit_program, self.console, self.total_cost),
-                ),
-                (("c", "clear"), self.clear_history),
+                (EXIT_COMMANDS, self.exit_program),
+                (CLEAR_COMMANDS, self.clear_history),
             ]
             for kw in keywords
         }
 
-    def run(self, initial_prompt: str | None = None, *args):
+    def run(self, initial_prompt: str | None = None):
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
         # fmt: off
         system("clear")
-        greeting_left = Text("gpt-cli", justify="left", style="dim bold yellow")
-        greeting_right = Text(f"{self.model.name}", justify="right", style="dim bold yellow")
+        greeting_left = Text("gpt-cli", justify="left", style=GREETING_PANEL_TEXT_STYLE)
+        greeting_right = Text(f"{self.model.name}", justify="right", style=GREETING_PANEL_TEXT_STYLE)
 
         # Create a panel with the help text, you can customize the box style
         columns = Columns([greeting_left, greeting_right], expand=True)
-        panel = Panel(columns, box=box.ROUNDED, style="dim blue", title_align="left")
+        panel = Panel(columns, box=box.ROUNDED, style=GREETING_PANEL_OUTLINE_STYLE, title_align="left")
         self.console.print(panel)
 
         while True:
             try:
-                user_input = initial_prompt if initial_prompt is not None else self.session.prompt(self.prompt).strip()
+                if (user_input := initial_prompt) is None:
+                    user_input = self.session.prompt(self.prompt).strip()
                 cleaned_input = user_input.casefold()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -95,7 +85,7 @@ class Prompt:
                 continue
             # TODO: this does not do anything while response is streaming...
             except EOFError:  # ctrl + D
-                exit_program(self.console, self.total_cost)
+                self.exit_program()
             finally:
                 initial_prompt = None
                 if not sys.stdin.closed:
@@ -111,7 +101,7 @@ class Prompt:
                 for text in self.model.stream_completion():
                     output.print(text)
         except (OpenAIError, AnthropicError) as e:
-            self.console.print(f"API Error: {str(e)}\n", style="yellow")
+            self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
         # fmt: on
 
@@ -124,26 +114,23 @@ class Prompt:
             if (total_price := self.model.get_cost_of_chat_history()) >= 0.01
             else ""
         )
-        self.console.print(ending_line, justify="right", style="dim")
+        self.console.print(ending_line, justify="right", style=COST_STYLE)
         self.count += 1
 
-    def clear_history(self, auto=False) -> None:
-        if not auto or self.count:
-            self.console.print(
-                f"\nhistory cleared: {self.count} messages total\n",
-                style="dim bold blue",
-            )
+    def clear_history(self) -> None:
+        message = f"\nhistory cleared: {self.count} messages total\n"
+        self.console.print(message, style=CLEAR_HISTORY_STYLE)
         self.total_cost += self.model.get_cost_of_chat_history()
         self.model.reset()
         self.count = 0
 
-
-def exit_program(console: Console, total_cost: int):
-    print(CLEAR_CURRENT_LINE)
-    system("clear")
-    console.print(
-        f"total cost of last session: ${total_cost:.3f}",
-        justify="right",
-        style="dim",
-    )
-    exit(0)
+    def exit_program(self):
+        print(CLEAR_CURRENT_LINE)
+        system("clear")
+        message = f"total cost of last session: ${self.total_cost:.3f}"
+        self.console.print(
+            message,
+            justify="right",
+            style=COST_STYLE,
+        )
+        exit(0)

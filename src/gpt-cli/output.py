@@ -9,22 +9,6 @@ from rich.live import Live
 from terminal import *
 
 
-# TODO: use this for consistency. Eventually load these from db.
-# custom_theme = Theme({
-#     "info": "dim cyan",
-#     "warning": "magenta",
-#     "danger": "bold red"
-# })
-
-
-# def md_theme(text_color: str):
-#     """
-#     Overrides Rich's default text theme with Rich tokens.
-#     Instead of a string, this func could accept a Rich.styles.Style obj
-#     """
-#     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
-
-
 class Output:
     """
     Encapsulates all the data needed to update the terminal with a chat completion generator response.

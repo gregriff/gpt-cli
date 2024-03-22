@@ -2,8 +2,7 @@ from abc import abstractmethod, ABC
 from typing import Generator
 
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
-from openai import Stream, OpenAI
-from openai.types.chat import ChatCompletionChunk
+from openai import OpenAI
 from tiktoken import encoding_for_model
 
 MODELS_AND_PRICES = {
@@ -51,6 +50,7 @@ class LLM(ABC):
     client = None
     api_key: str | None = None
     prices_per_token: dict[str, float] = None
+    _prompt_arguments = None
 
     @abstractmethod
     def stream_completion(self) -> Generator[str, str, str]:
@@ -66,19 +66,19 @@ class LLM(ABC):
 
 
 class AnthropicModel(LLM):
-    prompt_arguments = {
+    _prompt_arguments = {
         "max_tokens": 1000,
     }
 
     def __init__(self, name: str, api_key: str):
         self.client = Anthropic(api_key=api_key)
-        self.prompt_arguments["model"] = name
+        self._prompt_arguments["model"] = name
         self.name = name
         self.prices_per_token = MODELS_AND_PRICES["anthropic"][name]
 
     def stream_completion(self):
         with self.client.messages.stream(
-            messages=self.messages, **self.prompt_arguments
+            messages=self.messages, **self._prompt_arguments
         ) as stream:
             for text in stream.text_stream:
                 yield text
@@ -112,7 +112,7 @@ class AnthropicModel(LLM):
 
 
 class OpenAIModel(LLM):
-    prompt_arguments = {
+    _prompt_arguments = {
         "stream": True,
         "temperature": 0.7,
         "max_tokens": 1000,
@@ -120,23 +120,17 @@ class OpenAIModel(LLM):
 
     def __init__(self, name: str, api_key: str, system_message: str):
         self.client = OpenAI(api_key=api_key)
-        self.prompt_arguments["model"] = name
+        self._prompt_arguments["model"] = name
         self.name = name
         self.prices_per_token = MODELS_AND_PRICES["openai"][name]
-        self.system_message = {
-            "role": "system",
-            "content": system_message,
-        }
-        self.messages = [
-            self.system_message,
-        ]
+        self.system_message = {"role": "system", "content": system_message}
+        self.messages = [self.system_message]
 
     def stream_completion(self):
-        response_stream: Stream[ChatCompletionChunk] = (
-            self.client.chat.completions.create(
-                messages=self.messages, **self.prompt_arguments
-            )
+        response_stream = self.client.chat.completions.create(
+            messages=self.messages, **self._prompt_arguments
         )
+
         for chunk in response_stream:
             for choice in chunk.choices:
                 if (chunk_text := choice.delta.content) is not None:
@@ -153,7 +147,6 @@ class OpenAIModel(LLM):
             # every message follows <im_start>{role/name}\n{content}<im_end>\n
             num_tokens += 4
             for role, text in message.items():
-                assert isinstance(text, str)
                 num_tokens += len(encoding.encode(text))
                 if role == "name":  # if there's a name, the role is omitted
                     num_tokens -= 1  # role is always required and always 1 token
