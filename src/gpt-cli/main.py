@@ -30,7 +30,6 @@ def validate_llm_model(value: str):
 
 # TODO:
 #  - BETTER ERROR HANDLING from API docs
-#  - FIX PRICING
 #  -
 #  CLI features
 #  - one word for argv[2] needs to be treated as an argument and not a prompt
@@ -51,12 +50,12 @@ def validate_llm_model(value: str):
 
 @app.command()
 def main(
-    prompt: Annotated[str, Argument(help="Quoted text to prompt LLM. Leave blank for fresh REPL", metavar="[PROMPT]")] = None,
+    prompt: Annotated[str, Argument(help="Initial prompt. Leave blank for fresh REPL", metavar="[PROMPT]")] = None,
     model: Annotated[Optional[str], Option("--model", "-m", callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = "gpt-4-turbo-preview",
-    system_message: Annotated[Optional[str], Option(help="Influences all subsequent output (GPT only")] = default_system_message["content"],
+    system_message: Annotated[Optional[str], Option(help="Heavily influences responses from model")] = default_system_message["content"],
     code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = "native",
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
-    refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="Printing frequency from response buffer in Hz")] = 8,
+    refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="How frequently streamed responses are printed to the screen (Hz)")] = 8,
 ):
     # TODO: make this a factory given the model name
     if model in openai_models:

@@ -46,6 +46,7 @@ openai_models = list(MODELS_AND_PRICES["openai"].keys())
 
 
 class LLM(ABC):
+    """Encapsulates common functionality of OpenAI and Anthropic chat completion APIs"""
 
     def __init__(self):
         self.name: str = ""
@@ -54,8 +55,7 @@ class LLM(ABC):
         self.api_key: str | None = None
         self.prices_per_token: dict[str, float] = {}
         self.system_message: str | dict[str, str] = ""
-        self.usage = Usage(input_tokens=0, output_tokens=0)
-        self._prompt_arguments: dict = {"max_tokens": 1000}
+        self.prompt_arguments: dict = {"max_tokens": 1000}
 
     @abstractmethod
     def stream_completion(self) -> Generator[str, None, None]:
@@ -78,14 +78,15 @@ class AnthropicModel(LLM):
     def __init__(self, name: str, api_key: str, system_message: str):
         super().__init__()
         self.client = Anthropic(api_key=api_key)
-        self._prompt_arguments["model"] = name
+        self.prompt_arguments["model"] = name
         self.name = name
         self.system_message = system_message
+        self.usage = Usage(input_tokens=0, output_tokens=0)
         self.prices_per_token = MODELS_AND_PRICES["anthropic"][name]
 
     def stream_completion(self):
         with self.client.messages.stream(
-            messages=self.messages, system=self.system_message, **self._prompt_arguments
+            messages=self.messages, system=self.system_message, **self.prompt_arguments
         ) as stream:
             for text in stream.text_stream:
                 yield text
@@ -94,15 +95,14 @@ class AnthropicModel(LLM):
             self.usage.output_tokens += token_counts.output_tokens
 
     def get_cost_of_current_chat(self):
-        total_cost = (
+        return (
             self.usage.input_tokens * self.prices_per_token["prompt"]
             + self.usage.output_tokens * self.prices_per_token["response"]
         )
-        self.usage.input_tokens, self.usage.output_tokens = 0, 0
-        return total_cost
 
     def reset(self):
         self.messages = []
+        self.usage.input_tokens, self.usage.output_tokens = 0, 0
 
 
 class OpenAIModel(LLM):
@@ -114,8 +114,8 @@ class OpenAIModel(LLM):
     def __init__(self, name: str, api_key: str, system_message: str):
         super().__init__()
         self.client = OpenAI(api_key=api_key)
-        self._prompt_arguments["model"] = name
-        self._prompt_arguments.update(self.openai_prompt_args)
+        self.prompt_arguments["model"] = name
+        self.prompt_arguments.update(self.openai_prompt_args)
         self.name = name
         self.prices_per_token = MODELS_AND_PRICES["openai"][name]
         self.system_message = {"role": "system", "content": system_message}
@@ -123,7 +123,7 @@ class OpenAIModel(LLM):
 
     def stream_completion(self):
         response_stream = self.client.chat.completions.create(
-            messages=self.messages, **self._prompt_arguments
+            messages=self.messages, **self.prompt_arguments
         )
 
         for chunk in response_stream:
