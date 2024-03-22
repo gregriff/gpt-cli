@@ -111,7 +111,7 @@ class Prompt:
 
         ending_line = (
             f"Price: ${total_price:.3f}"
-            if (total_price := self.model.get_cost_of_chat_history()) >= 0.01
+            if (total_price := self.model.get_cost_of_current_chat()) >= 0.01
             else ""
         )
         self.console.print(ending_line, justify="right", style=COST_STYLE)
@@ -120,7 +120,7 @@ class Prompt:
     def clear_history(self) -> None:
         message = f"\nhistory cleared: {self.count} messages total\n"
         self.console.print(message, style=CLEAR_HISTORY_STYLE)
-        self.total_cost += self.model.get_cost_of_chat_history()
+        self.total_cost += self.model.get_cost_of_current_chat()
         self.model.reset()
         self.count = 0
 

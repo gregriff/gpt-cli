@@ -62,7 +62,7 @@ def main(
     if model in openai_models:
         llm = OpenAIModel(name=model, api_key=openai_apikey, system_message=system_message)
     else:
-        llm = AnthropicModel(name=model, api_key=anthropic_apikey)
+        llm = AnthropicModel(name=model, api_key=anthropic_apikey, system_message=system_message)
 
     # cool themes: stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(

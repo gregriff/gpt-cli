@@ -1,7 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Generator
 
-from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
+from anthropic import Anthropic
+from anthropic.types import Usage
 from openai import OpenAI
 from tiktoken import encoding_for_model
 
@@ -45,82 +46,76 @@ openai_models = list(MODELS_AND_PRICES["openai"].keys())
 
 
 class LLM(ABC):
-    name: str = None
-    messages: list = []
-    client = None
-    api_key: str | None = None
-    prices_per_token: dict[str, float] = None
-    _prompt_arguments = None
+
+    def __init__(self):
+        self.name: str = ""
+        self.messages: list = []
+        self.client = None
+        self.api_key: str | None = None
+        self.prices_per_token: dict[str, float] = {}
+        self.system_message: str | dict[str, str] = ""
+        self.usage = Usage(input_tokens=0, output_tokens=0)
+        self._prompt_arguments: dict = {"max_tokens": 1000}
 
     @abstractmethod
-    def stream_completion(self) -> Generator[str, str, str]:
+    def stream_completion(self) -> Generator[str, None, None]:
+        """yield partial responses of chat completions and keep track of tokens sent and received"""
         pass
 
     @abstractmethod
-    def get_cost_of_chat_history(self) -> float:
+    def get_cost_of_current_chat(self) -> float:
+        """calculate cost via recommended token counting method and prices pulled from docs"""
         pass
 
     @abstractmethod
-    def reset(self):
+    def reset(self) -> None:
+        """clear the state of the current chat"""
         pass
 
 
 class AnthropicModel(LLM):
-    _prompt_arguments = {
-        "max_tokens": 1000,
-    }
 
-    def __init__(self, name: str, api_key: str):
+    def __init__(self, name: str, api_key: str, system_message: str):
+        super().__init__()
         self.client = Anthropic(api_key=api_key)
         self._prompt_arguments["model"] = name
         self.name = name
+        self.system_message = system_message
         self.prices_per_token = MODELS_AND_PRICES["anthropic"][name]
 
     def stream_completion(self):
         with self.client.messages.stream(
-            messages=self.messages, **self._prompt_arguments
+            messages=self.messages, system=self.system_message, **self._prompt_arguments
         ) as stream:
             for text in stream.text_stream:
                 yield text
+            token_counts = stream.get_final_message().usage
+            self.usage.input_tokens += token_counts.input_tokens
+            self.usage.output_tokens += token_counts.output_tokens
 
-    def role_to_name(self, role: str) -> str:
-        if role == "system" or role == "user":
-            return HUMAN_PROMPT
-        elif role == "assistant":
-            return AI_PROMPT
-        else:
-            raise ValueError(f"Unknown role: {role}")
-
-    def make_prompt(self) -> str:
-        prompt = "\n".join(
-            [
-                f"{self.role_to_name(message['role'])}{message['content']}"
-                for message in self.messages
-            ]
+    def get_cost_of_current_chat(self):
+        total_cost = (
+            self.usage.input_tokens * self.prices_per_token["prompt"]
+            + self.usage.output_tokens * self.prices_per_token["response"]
         )
-        prompt += f"{self.role_to_name('assistant')}"
-        return prompt
-
-    def get_cost_of_chat_history(self):
-        return (
-            self.client.count_tokens(self.make_prompt())
-            * self.prices_per_token["prompt"]
-        )
+        self.usage.input_tokens, self.usage.output_tokens = 0, 0
+        return total_cost
 
     def reset(self):
         self.messages = []
 
 
 class OpenAIModel(LLM):
-    _prompt_arguments = {
+    openai_prompt_args = {
         "stream": True,
         "temperature": 0.7,
-        "max_tokens": 1000,
     }
 
     def __init__(self, name: str, api_key: str, system_message: str):
+        super().__init__()
         self.client = OpenAI(api_key=api_key)
         self._prompt_arguments["model"] = name
+        self._prompt_arguments.update(self.openai_prompt_args)
         self.name = name
         self.prices_per_token = MODELS_AND_PRICES["openai"][name]
         self.system_message = {"role": "system", "content": system_message}
@@ -132,26 +127,33 @@ class OpenAIModel(LLM):
         )
 
         for chunk in response_stream:
-            for choice in chunk.choices:
-                if (chunk_text := choice.delta.content) is not None:
-                    yield chunk_text
+            if (text := chunk.choices[0].delta.content) is not None:
+                yield text
 
-    def get_cost_of_chat_history(self):
+    def get_cost_of_current_chat(self):
         """
-        Get the total number of tokens used in the current chat history given OpenAI's token
-        counting package `tiktoken`
+        Custom token counting algorithm using official tokenizer based on code from:
+        https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
         """
         encoding = encoding_for_model(self.name)
-        num_tokens = 0
+        num_prompt_tokens, num_response_tokens = 0, 0
+        tokens_per_message, tokens_per_name = 3, 1
         for message in self.messages:
-            # every message follows <im_start>{role/name}\n{content}<im_end>\n
-            num_tokens += 4
-            for role, text in message.items():
-                num_tokens += len(encoding.encode(text))
-                if role == "name":  # if there's a name, the role is omitted
-                    num_tokens -= 1  # role is always required and always 1 token
-        num_tokens += 2  # every reply is primed with <im_start>assistant
-        return num_tokens * self.prices_per_token["prompt"]
+            num_prompt_tokens += tokens_per_message
+            for key, data in message.items():
+                num_prompt_tokens += (token_count := len(encoding.encode(data)))
+                if key == "name":
+                    num_prompt_tokens += tokens_per_name
+                if key == "role":
+                    if data == "assistant":
+                        num_response_tokens += token_count
+
+        # every reply is primed with <|start|>assistant<|message|>
+        num_prompt_tokens += 3
+        return (
+            num_prompt_tokens * self.prices_per_token["prompt"]
+            + num_response_tokens * self.prices_per_token["response"]
+        )
 
     def reset(self):
         self.messages = [self.system_message]
