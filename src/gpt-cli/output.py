@@ -6,18 +6,14 @@ from rich.style import Style
 from rich.text import Text
 from rich.live import Live
 
-from terminal import *
-
 
 class Output:
     """
     Encapsulates all the data needed to update the terminal with a chat completion generator response.
-    Keeps track of how many lines are printed to the screen and pretty-prints everything.
     """
 
     def __init__(self, console: Console, color: Style, theme, refresh_rate: int):
         self.full_response = ""
-        self.terminal_width = TERM_WIDTH
 
         self.console = console
         self.live: Optional[Live] = None

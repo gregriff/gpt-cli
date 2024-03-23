@@ -1,12 +1,17 @@
 from rich.theme import Theme
 
-# Any Rich Style: https://rich.readthedocs.io/en/stable/style.html
-GREETING_PANEL_TEXT_STYLE = "dim bold yellow"
+### Decorations
+GREETING_TEXT = "gpt-cli"
+GREETING_PANEL_TEXT_STYLE = "dim bold yellow"  # Any Rich Style: https://rich.readthedocs.io/en/stable/style.html
 GREETING_PANEL_OUTLINE_STYLE = "dim blue"
 CLEAR_HISTORY_STYLE = "dim bold blue"
 ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
+
+### Output
 MARKDOWN_CODE = "bold blue"
+DEFAULT_TEXT_COLOR = "green"
+DEFAULT_CODE_THEME = "native"  # any pygments code theme
 
 
 def md_theme(text_color: str):

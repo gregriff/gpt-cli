@@ -36,7 +36,6 @@ class Prompt:
         self.count = 0
         self.tokens = 0
         self.total_cost = 0
-        self.terminal_width = TERM_WIDTH
         self.refresh_rate = refresh_rate
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
@@ -65,8 +64,8 @@ class Prompt:
         """
         # fmt: off
         system("clear")
-        greeting_left = Text("gpt-cli", justify="left", style=GREETING_PANEL_TEXT_STYLE)
-        greeting_right = Text(f"{self.model.name}", justify="right", style=GREETING_PANEL_TEXT_STYLE)
+        greeting_left = Text(GREETING_TEXT, justify="left", style=GREETING_PANEL_TEXT_STYLE)
+        greeting_right = Text(f"{self.model.model_name}", justify="right", style=GREETING_PANEL_TEXT_STYLE)
 
         # Create a panel with the help text, you can customize the box style
         columns = Columns([greeting_left, greeting_right], expand=True)

@@ -8,7 +8,8 @@ from config import (
     CONFIG,
 )
 from prompt import Prompt
-from models import OpenAIModel, AnthropicModel, anthropic_models, openai_models
+from models import OpenAIModel, AnthropicModel
+from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
 
 openai_apikey = CONFIG.get("openaiAPIKey")
 anthropic_apikey = CONFIG.get("anthropicAPIKey")
@@ -23,7 +24,9 @@ def validate_code_styles(value: str):
 
 
 def validate_llm_model(value: str):
-    if value not in (valid_models := openai_models + anthropic_models):
+    if value not in (
+        valid_models := OpenAIModel.model_names + AnthropicModel.model_names
+    ):
         raise BadParameter(f"{value} \n\nChoose from {valid_models}")
     return value
 
@@ -52,13 +55,13 @@ def validate_llm_model(value: str):
 def main(
     prompt: Annotated[str, Argument(help="Initial prompt. Leave blank for fresh REPL", metavar="[PROMPT]")] = None,
     model: Annotated[Optional[str], Option("--model", "-m", callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = "gpt-4-turbo-preview",
-    system_message: Annotated[Optional[str], Option(help="Heavily influences responses from model")] = default_system_message["content"],
-    code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = "native",
-    text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
+    system_message: Annotated[Optional[str], Option(help="Heavily influences responses from model")] = default_system_message,
+    code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
+    text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
     refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="How frequently streamed responses are printed to the screen (Hz)")] = 8,
 ):
     # TODO: make this a factory given the model name
-    if model in openai_models:
+    if model in OpenAIModel.model_names:
         llm = OpenAIModel(name=model, api_key=openai_apikey, system_message=system_message)
     else:
         llm = AnthropicModel(name=model, api_key=anthropic_apikey, system_message=system_message)

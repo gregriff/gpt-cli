@@ -1,65 +1,30 @@
 from abc import abstractmethod, ABC
-from typing import Generator
+from typing import Generator, Callable
 
 from anthropic import Anthropic
 from anthropic.types import Usage
 from openai import OpenAI
 from tiktoken import encoding_for_model
 
-MODELS_AND_PRICES = {
-    "openai": {
-        "gpt-3.5-turbo": {
-            "prompt": 0.003 / 1000,
-            "response": 0.004 / 1000,
-        },
-        "gpt-4": {
-            "prompt": 0.03 / 1000,
-            "response": 0.06 / 1000,
-        },
-        "gpt-4-32k": {
-            "prompt": 0.06 / 1000,
-            "response": 0.12 / 1000,
-        },
-        "gpt-4-turbo-preview": {
-            "prompt": 0.01 / 1000,
-            "response": 0.03 / 1000,
-        },
-    },
-    "anthropic": {
-        "claude-3-opus-20240229": {
-            "prompt": 15.0 / 1_000_000,
-            "response": 75.0 / 1_000_000,
-        },
-        "claude-3-sonnet-20240229": {
-            "prompt": 3.0 / 1_000_000,
-            "response": 15.0 / 1_000_000,
-        },
-        "claude-3-haiku-20240307": {
-            "prompt": 0.25 / 1_000_000,
-            "response": 1.25 / 1_000_000,
-        },
-    },
-}
-
-anthropic_models = list(MODELS_AND_PRICES["anthropic"].keys())
-openai_models = list(MODELS_AND_PRICES["openai"].keys())
+from config import MODELS_AND_PRICES
 
 
 class LLM(ABC):
     """Encapsulates common functionality of OpenAI and Anthropic chat completion APIs"""
 
-    def __init__(self):
-        self.name: str = ""
-        self.messages: list = []
-        self.client = None
-        self.api_key: str | None = None
-        self.prices_per_token: dict[str, float] = {}
-        self.system_message: str | dict[str, str] = ""
-        self.prompt_arguments: dict = {"max_tokens": 1000}
+    def __init__(self, name: str, api_key: str, system_message: str):
+        self.model_name = name
+        self.api_key = api_key
+        self.system_message = system_message
+        self.prices_per_token: Callable[[str], dict[str, float]] = (
+            lambda key: MODELS_AND_PRICES.get(key)[name]
+        )
+        self.prompt_arguments = {"max_tokens": 1000, "model": name}
+        self.messages = []
 
     @abstractmethod
     def stream_completion(self) -> Generator[str, None, None]:
-        """yield partial responses of chat completions and keep track of tokens sent and received"""
+        """prompt model with the current chat history and yield partial responses as they come in"""
         pass
 
     @abstractmethod
@@ -74,15 +39,13 @@ class LLM(ABC):
 
 
 class AnthropicModel(LLM):
+    model_names = list(MODELS_AND_PRICES["anthropic"].keys())
 
     def __init__(self, name: str, api_key: str, system_message: str):
-        super().__init__()
+        super().__init__(name, api_key, system_message)
         self.client = Anthropic(api_key=api_key)
-        self.prompt_arguments["model"] = name
-        self.name = name
-        self.system_message = system_message
         self.usage = Usage(input_tokens=0, output_tokens=0)
-        self.prices_per_token = MODELS_AND_PRICES["anthropic"][name]
+        self.prices_per_token = self.prices_per_token("anthropic")
 
     def stream_completion(self):
         with self.client.messages.stream(
@@ -106,18 +69,17 @@ class AnthropicModel(LLM):
 
 
 class OpenAIModel(LLM):
+    model_names = list(MODELS_AND_PRICES["openai"].keys())
     openai_prompt_args = {
         "stream": True,
         "temperature": 0.7,
     }
 
     def __init__(self, name: str, api_key: str, system_message: str):
-        super().__init__()
+        super().__init__(name, api_key, system_message)
         self.client = OpenAI(api_key=api_key)
-        self.prompt_arguments["model"] = name
         self.prompt_arguments.update(self.openai_prompt_args)
-        self.name = name
-        self.prices_per_token = MODELS_AND_PRICES["openai"][name]
+        self.prices_per_token = self.prices_per_token("openai")
         self.system_message = {"role": "system", "content": system_message}
         self.messages = [self.system_message]
 
@@ -135,7 +97,7 @@ class OpenAIModel(LLM):
         Custom token counting algorithm using official tokenizer based on code from:
         https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
         """
-        encoding = encoding_for_model(self.name)
+        encoding = encoding_for_model(self.model_name)
         num_prompt_tokens, num_response_tokens = 0, 0
         tokens_per_message, tokens_per_name = 3, 1
         for message in self.messages:
