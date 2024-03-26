@@ -1,5 +1,6 @@
 from typing import Optional
 
+from rich import status
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.style import Style
@@ -21,8 +22,11 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.refresh_rate = refresh_rate
+        self.loading_response = True
+        self.spinner = status.Status("")
 
     def __enter__(self) -> "Output":
+        self.spinner.__enter__()
         self.live = Live(
             console=self.console,
             refresh_per_second=self.refresh_rate,
@@ -37,6 +41,9 @@ class Output:
         self.console.print()
 
     def print(self, text: str, markdown=True):
+        if self.loading_response:
+            self.loading_response = False
+            self.spinner.__exit__(None, None, None)
         self.full_response += text
         if markdown:
             self.live.update(

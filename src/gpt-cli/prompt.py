@@ -14,6 +14,7 @@ from rich.panel import Panel
 from rich.style import Style
 from rich.console import Console
 from rich.text import Text
+
 from terminal import *
 from output import Output
 from models import LLM
@@ -35,9 +36,7 @@ class Prompt:
         self.refresh_rate = refresh_rate
         self.multiline = False
 
-        self.session = PromptSession(
-            editing_mode=EditingMode.VI, prompt_continuation="..."
-        )
+        self.session = PromptSession(editing_mode=EditingMode.VI)
         self.console = Console(width=get_term_width(), theme=md_theme(text_color))
         self.bindings = KeyBindings()
 

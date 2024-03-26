@@ -63,7 +63,7 @@ and the color of the plaintext responses can be set to most normal colors using 
 The program is a simple REPL. Each time you click _Enter_ your prompt will be sent and the response will be streamed in real time. 
 `CTRL+D` and `CTRL+C` work as expected in a REPL, exiting the program and cancelling the current loop, respectively. Entering `q`, `quit`, `e`, or `exit` while in prompt mode will also exit the program.
 
-When typing a prompt, basic keyboard shortcuts are available like history navigation with the arrow-keys. More will be added in the future. Multiline text input is supported by entering
+When typing a prompt, basic keyboard shortcuts are available like history navigation with the arrow-keys and deleting entire line with `CTRL + U`. More will be added in the future. Multiline text input is supported by entering
 `ml` or "\" (single backslash) into the prompt. This is useful when pasting code into the prompt. 
 
 > When in multiline mode, you must use `Meta + Enter` to submit the prompt. On macOS it is `[Option or Command] + Escape + Enter`
