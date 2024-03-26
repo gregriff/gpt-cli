@@ -1,7 +1,6 @@
 import sys
 from functools import partial
 from os import system
-from termios import tcflush, TCIFLUSH
 from typing import Callable
 
 from openai import OpenAIError
@@ -72,6 +71,7 @@ class Prompt:
             try:
                 if (user_input := initial_prompt) is None:
                     user_input = self.session.prompt(self.prompt).strip()
+                disable_input()
                 cleaned_input = user_input.casefold()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -83,8 +83,7 @@ class Prompt:
                 self.exit_program()
             finally:
                 initial_prompt = None
-                if not sys.stdin.closed:
-                    tcflush(sys.stdin, TCIFLUSH)  # discard any user input while response was printing
+                reenable_input()
         # fmt: on
 
     def prompt_llm(self, user_input: str):
