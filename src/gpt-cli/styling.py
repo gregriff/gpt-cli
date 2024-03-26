@@ -1,3 +1,4 @@
+from prompt_toolkit import HTML
 from rich.theme import Theme
 
 ### Decorations
@@ -7,6 +8,10 @@ GREETING_PANEL_OUTLINE_STYLE = "dim blue"
 CLEAR_HISTORY_STYLE = "dim bold blue"
 ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
+
+PROMPT_LEAD = HTML(
+    f"<b><ansicyan>?</ansicyan></b> <b><ansibrightyellow>></ansibrightyellow></b> "
+)
 
 ### Output
 MARKDOWN_CODE = "bold blue"

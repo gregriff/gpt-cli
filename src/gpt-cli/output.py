@@ -9,7 +9,8 @@ from rich.live import Live
 
 class Output:
     """
-    Encapsulates all the data needed to update the terminal with a chat completion generator response.
+    Encapsulates all the data needed to update the terminal with a chat completion generator response
+    with markdown formatting
     """
 
     def __init__(self, console: Console, color: Style, theme, refresh_rate: int):

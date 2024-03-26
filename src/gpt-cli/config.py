@@ -10,25 +10,17 @@ with open(env_file) as file:
 default_system_message = "You are a concise assistant to a software engineer"
 
 MODELS_AND_PRICES = {
-    "openai": {
+    "openai": {  # https://openai.com/pricing#language-models
         "gpt-3.5-turbo": {
-            "prompt": 0.003 / 1000,
-            "response": 0.004 / 1000,
-        },
-        "gpt-4": {
-            "prompt": 0.03 / 1000,
-            "response": 0.06 / 1000,
-        },
-        "gpt-4-32k": {
-            "prompt": 0.06 / 1000,
-            "response": 0.12 / 1000,
+            "prompt": 0.5 / 1_000_000,
+            "response": 1.50 / 1_000_000,
         },
         "gpt-4-turbo-preview": {
-            "prompt": 0.01 / 1000,
-            "response": 0.03 / 1000,
+            "prompt": 10.0 / 1_000_000,
+            "response": 30.0 / 1_000_000,
         },
     },
-    "anthropic": {
+    "anthropic": {  # https://www.anthropic.com/api
         "claude-3-opus-20240229": {
             "prompt": 15.0 / 1_000_000,
             "response": 75.0 / 1_000_000,

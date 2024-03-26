@@ -5,19 +5,17 @@ from termios import tcflush, TCIFLUSH
 from typing import Callable
 
 from openai import OpenAIError
+from anthropic import AnthropicError
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
-from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings
 from rich import box
 from rich.columns import Columns
 from rich.panel import Panel
-
 from rich.style import Style
 from rich.console import Console
 from rich.text import Text
-from anthropic import AnthropicError
 from terminal import *
 from output import Output
 from models import LLM
@@ -40,11 +38,9 @@ class Prompt:
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
         self.console = Console(width=TERM_WIDTH, theme=md_theme(text_color))
-        self.prompt = HTML(
-            f"<b><ansicyan>?</ansicyan></b> <b><ansibrightyellow>></ansibrightyellow></b> "
-        )
         self.bindings = KeyBindings()
 
+        self.prompt = PROMPT_LEAD
         self.color = Style.parse(text_color)
         self.theme = code_theme
 
@@ -94,6 +90,7 @@ class Prompt:
     def prompt_llm(self, user_input: str):
         # fmt: off
         print(RESET)
+        self.console.width = TERM_WIDTH  # adjust printing if user has resized their terminal
         self.model.messages.append({"role": "user", "content": user_input})
         try:
             with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
@@ -107,10 +104,9 @@ class Prompt:
         self.model.messages.append(
             {"role": "assistant", "content": output.full_response}
         )
-
         ending_line = (
-            f"Price: ${total_price:.3f}"
-            if (total_price := self.model.get_cost_of_current_chat()) >= 0.01
+            f"Price: ${total_cost:.3f}"
+            if (total_cost := self.model.get_cost_of_current_chat() >= 0.01)
             else ""
         )
         self.console.print(ending_line, justify="right", style=COST_STYLE)
@@ -126,6 +122,7 @@ class Prompt:
     def exit_program(self):
         print(CLEAR_CURRENT_LINE)
         system("clear")
+        self.total_cost += self.model.get_cost_of_current_chat()
         message = f"total cost of last session: ${self.total_cost:.3f}"
         self.console.print(
             message,
