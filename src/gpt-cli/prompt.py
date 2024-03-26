@@ -1,4 +1,3 @@
-import sys
 from functools import partial
 from os import system
 from typing import Callable
@@ -34,9 +33,12 @@ class Prompt:
         self.tokens = 0
         self.total_cost = 0
         self.refresh_rate = refresh_rate
+        self.multiline = False
 
-        self.session = PromptSession(editing_mode=EditingMode.VI)
-        self.console = Console(width=TERM_WIDTH, theme=md_theme(text_color))
+        self.session = PromptSession(
+            editing_mode=EditingMode.VI, prompt_continuation="..."
+        )
+        self.console = Console(width=get_term_width(), theme=md_theme(text_color))
         self.bindings = KeyBindings()
 
         self.prompt = PROMPT_LEAD
@@ -49,6 +51,7 @@ class Prompt:
             for keywords, function in [
                 (EXIT_COMMANDS, self.exit_program),
                 (CLEAR_COMMANDS, self.clear_history),
+                (MULTILINE_COMMANDS, self.enable_multiline),
             ]
             for kw in keywords
         }
@@ -69,16 +72,19 @@ class Prompt:
 
         while True:
             try:
+                # TODO: add "raw" mode for one-shot unformatted outputs, for scripting
                 if (user_input := initial_prompt) is None:
-                    user_input = self.session.prompt(self.prompt).strip()
+                    style = MULTILINE_PROMPT_STYLE if self.multiline else PROMPT_STYLE
+                    user_input = self.session.prompt(self.prompt, style=style, multiline=self.multiline).strip()
                 disable_input()
                 cleaned_input = user_input.casefold()
+                if not cleaned_input:
+                    continue  # prevent API error
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
             except KeyboardInterrupt:
                 print()
                 continue
-            # TODO: this does not do anything while response is streaming...
             except EOFError:  # ctrl + D
                 self.exit_program()
             finally:
@@ -89,7 +95,7 @@ class Prompt:
     def prompt_llm(self, user_input: str):
         # fmt: off
         print(RESET)
-        self.console.width = TERM_WIDTH  # adjust printing if user has resized their terminal
+        self.console.width = get_term_width()  # adjust printing if user has resized their terminal
         self.model.messages.append({"role": "user", "content": user_input})
         try:
             with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
@@ -110,6 +116,7 @@ class Prompt:
         )
         self.console.print(ending_line, justify="right", style=COST_STYLE)
         self.count += 1
+        self.multiline = False
 
     def clear_history(self) -> None:
         message = f"\nhistory cleared: {self.count} messages total\n"
@@ -118,7 +125,7 @@ class Prompt:
         self.model.reset()
         self.count = 0
 
-    def exit_program(self):
+    def exit_program(self) -> None:
         print(CLEAR_CURRENT_LINE)
         system("clear")
         self.total_cost += self.model.get_cost_of_current_chat()
@@ -129,3 +136,11 @@ class Prompt:
             style=COST_STYLE,
         )
         exit(0)
+
+    def enable_multiline(self) -> None:
+        print(
+            MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS,
+            CLEAR_CURRENT_LINE,
+            end="",
+        )
+        self.multiline = True
