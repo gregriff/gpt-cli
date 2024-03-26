@@ -47,7 +47,6 @@ def validate_llm_model(value: str):
 #  -
 #   long term todos:
 #   - DOCKER BUILD, ruff, uv, pipx?
-#   - menu commands in bottom toolbar
 # fmt: off
 
 
@@ -66,7 +65,6 @@ def main(
     else:
         llm = AnthropicModel(name=model, api_key=anthropic_apikey, system_message=system_message)
 
-    # cool themes: stata-dark. dracula. native. inkpot. vim.
     _prompt = Prompt(
         llm,
         text_color.casefold(),

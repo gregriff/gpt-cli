@@ -40,7 +40,6 @@ class Prompt:
         self.console = Console(width=get_term_width(), theme=md_theme(text_color))
         self.bindings = KeyBindings()
 
-        self.prompt = PROMPT_LEAD
         self.color = Style.parse(text_color)
         self.theme = code_theme
 
@@ -74,7 +73,7 @@ class Prompt:
                 # TODO: add "raw" mode for one-shot unformatted outputs, for scripting
                 if (user_input := initial_prompt) is None:
                     style = MULTILINE_PROMPT_STYLE if self.multiline else PROMPT_STYLE
-                    user_input = self.session.prompt(self.prompt, style=style, multiline=self.multiline).strip()
+                    user_input = self.session.prompt(PROMPT_LEAD, style=style, multiline=self.multiline).strip()
                 disable_input()
                 cleaned_input = user_input.casefold()
                 if not cleaned_input:

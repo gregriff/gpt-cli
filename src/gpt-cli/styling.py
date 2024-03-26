@@ -22,7 +22,7 @@ ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
 
 ### Output
-MARKDOWN_CODE = "bold blue"
+MARKDOWN_CODE = "bold blue"  # cool themes: stata-dark. dracula. native. inkpot. vim.
 DEFAULT_TEXT_COLOR = "green"
 DEFAULT_CODE_THEME = "native"  # any pygments code theme: https://pygments.org/styles/
 
@@ -33,11 +33,3 @@ def md_theme(text_color: str):
     Instead of a string, this func could accept a Rich.styles.Style obj
     """
     return Theme({"markdown": text_color, "markdown.code": MARKDOWN_CODE})
-
-
-# Example
-# custom_theme = Theme({
-#     "info": "dim cyan",
-#     "warning": "magenta",
-#     "danger": "bold red"
-# })

@@ -11,7 +11,7 @@ Now a staple in my daily workflow as a rubber duck debugger, I have found this C
 
 ## Installation and Recommended Setup
 
-Developed on MacOS and Ubuntu. All instructions will assume a *nix machine with Python 3.11+ installed. 
+Developed on MacOS and Ubuntu. All instructions will assume a unix-like OS with Python 3.11+ installed. 
 
 An OpenAI API key is required to access the GPT models and an Anthropic API key is needed for the Claude models. Both of these companies currently require paying for usage credits in advance,
 so ensure you have an account with money loaded before using the CLI.
@@ -91,8 +91,8 @@ Feature requests are more than welcome, however I will probably take a while to 
 - Support for other LLMs if any seem worth adding
 - Incorporate cutting-edge tooling like [uv](https://github.com/astral-sh/uv) and [Ruff](https://github.com/astral-sh/ruff). 
 
-## Notable References
+## Notable dependencies and references
 
-- [OpenAI API Overview](https://platform.openai.com/docs/api-reference/introduction)
 - [Typer](https://typer.tiangolo.com/)
 - [Prompt Toolkit](https://python-prompt-toolkit.readthedocs.io/en/master/)
+- [Similar project by kharvd](https://github.com/kharvd/gpt-cli/tree/main)
