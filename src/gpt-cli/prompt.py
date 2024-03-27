@@ -27,13 +27,11 @@ class Prompt:
         model: LLM,
         text_color: str,
         code_theme: str,
-        refresh_rate: int,
     ):
         self.model = model
         self.count = 0
         self.tokens = 0
         self.total_cost = 0
-        self.refresh_rate = refresh_rate
         self.multiline = False
 
         self.session = PromptSession(editing_mode=EditingMode.VI)
@@ -96,7 +94,7 @@ class Prompt:
         self.console.width = get_term_width()  # adjust printing if user has resized their terminal
         self.model.messages.append({"role": "user", "content": user_input})
         try:
-            with Output(self.console, self.color, self.theme, self.refresh_rate) as output:
+            with Output(self.console, self.color, self.theme) as output:
                 for text in self.model.stream_completion():
                     output.print(text)
         except (OpenAIError, AnthropicError) as e:

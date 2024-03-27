@@ -2,7 +2,9 @@ from prompt_toolkit.styles import Style as ptkStyle
 from rich.theme import Theme
 
 # add an entry with a class name of empty string to color user input
-PROMPT_STYLE = ptkStyle([("primary", "ansicyan"), ("secondary", "ansibrightyellow")])
+PROMPT_STYLE = ptkStyle(
+    [("primary", "ansibrightcyan"), ("secondary", "ansibrightyellow")]
+)
 MULTILINE_PROMPT_STYLE = ptkStyle(
     [("primary", "ansicyan"), ("secondary", "ansipurple")]
 )

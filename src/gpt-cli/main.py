@@ -3,16 +3,10 @@ from typing import Optional, Annotated
 from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
 
-from config import (
-    default_system_message,
-    CONFIG,
-)
+from config import default_system_message
 from prompt import Prompt
 from models import OpenAIModel, AnthropicModel
 from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
-
-openai_apikey = CONFIG.get("openaiAPIKey")
-anthropic_apikey = CONFIG.get("anthropicAPIKey")
 
 app = Typer(name="gpt-cli", add_completion=False)
 
@@ -57,19 +51,20 @@ def main(
     system_message: Annotated[Optional[str], Option(help="Heavily influences responses from model")] = default_system_message,
     code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
-    refresh_rate: Annotated[int, Option("--refresh-rate", "-R", help="How frequently streamed responses are printed to the screen (Hz)")] = 8,
 ):
-    # TODO: make this a factory given the model name
+    model_args = dict(
+        name=model,
+        system_message=system_message
+    )
     if model in OpenAIModel.model_names:
-        llm = OpenAIModel(name=model, api_key=openai_apikey, system_message=system_message)
+        llm = OpenAIModel(**model_args)
     else:
-        llm = AnthropicModel(name=model, api_key=anthropic_apikey, system_message=system_message)
+        llm = AnthropicModel(**model_args)
 
     _prompt = Prompt(
         llm,
         text_color.casefold(),
         code_theme.casefold(),
-        int(refresh_rate),
     )
     _prompt.run(prompt)
 

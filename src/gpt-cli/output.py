@@ -14,14 +14,13 @@ class Output:
     with markdown formatting
     """
 
-    def __init__(self, console: Console, color: Style, theme, refresh_rate: int):
+    def __init__(self, console: Console, color: Style, theme):
         self.full_response = ""
 
         self.console = console
         self.live: Optional[Live] = None
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
-        self.refresh_rate = refresh_rate
         self.loading_response = True
         self.spinner = status.Status("")
 
@@ -29,7 +28,6 @@ class Output:
         self.spinner.__enter__()
         self.live = Live(
             console=self.console,
-            refresh_per_second=self.refresh_rate,
             auto_refresh=False,
             vertical_overflow="ellipsis",
         )

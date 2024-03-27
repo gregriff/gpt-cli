@@ -6,7 +6,7 @@ from anthropic.types import Usage
 from openai import OpenAI
 from tiktoken import encoding_for_model
 
-from config import MODELS_AND_PRICES
+from config import MODELS_AND_PRICES, CONFIG
 
 
 class LLM(ABC):
@@ -41,7 +41,11 @@ class LLM(ABC):
 class AnthropicModel(LLM):
     model_names = list(MODELS_AND_PRICES["anthropic"].keys())
 
-    def __init__(self, name: str, api_key: str, system_message: str):
+    def __init__(self, name: str, system_message: str):
+        if (api_key := CONFIG.get("anthropicAPIKey")) is None:
+            raise EnvironmentError(
+                'Missing value for "anthropicAPIKey" in file env.json'
+            )
         super().__init__(name, api_key, system_message)
         self.client = Anthropic(api_key=api_key)
         self.usage = Usage(input_tokens=0, output_tokens=0)
@@ -75,7 +79,9 @@ class OpenAIModel(LLM):
         "temperature": 0.7,
     }
 
-    def __init__(self, name: str, api_key: str, system_message: str):
+    def __init__(self, name: str, system_message: str):
+        if (api_key := CONFIG.get("openaiAPIKey")) is None:
+            raise EnvironmentError('Missing value for "openaiAPIKey" in file env.json')
         super().__init__(name, api_key, system_message)
         self.client = OpenAI(api_key=api_key)
         self.prompt_arguments.update(self.openai_prompt_args)
