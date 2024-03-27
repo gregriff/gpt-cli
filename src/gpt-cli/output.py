@@ -7,6 +7,8 @@ from rich.style import Style
 from rich.text import Text
 from rich.live import Live
 
+from styling import SPINNER
+
 
 class Output:
     """
@@ -22,7 +24,9 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.loading_response = True
-        self.spinner = status.Status("")
+
+        # TODO: ensure this is properly integrated with live display to avoid cursor issues
+        self.spinner = status.Status("", spinner=SPINNER)
 
     def __enter__(self) -> "Output":
         self.spinner.__enter__()
@@ -62,3 +66,4 @@ class Output:
                 soft_wrap=True,
                 end="",
             )
+            self.live.refresh()

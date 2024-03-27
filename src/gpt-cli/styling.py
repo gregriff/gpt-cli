@@ -22,6 +22,7 @@ GREETING_PANEL_OUTLINE_STYLE = "dim blue"
 CLEAR_HISTORY_STYLE = "dim bold blue"
 ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
+SPINNER = "dots"  # Run `python -m rich.spinner` to see all options
 
 ### Output
 MARKDOWN_CODE = "bold blue"  # cool themes: stata-dark. dracula. native. inkpot. vim.

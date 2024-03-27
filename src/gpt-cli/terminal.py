@@ -10,8 +10,6 @@ CLEAR_TO_END_OF_CURSOR = "\033[K"
 MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS = "\033[F"
 CLEAR_LINE_ABOVE_CURRENT = "\033[F\033[K"
 
-STDIN_FD = stdin.fileno()
-
 EXIT_COMMANDS = "exit", "e", "q", "quit"
 CLEAR_COMMANDS = "c", "clear"
 MULTILINE_COMMANDS = "\\", "ml"
@@ -19,13 +17,13 @@ MULTILINE_COMMANDS = "\\", "ml"
 
 def disable_input() -> None:
     """disable echoing of characters. this prevents unwanted glitches in displaying LLM output"""
-    setcbreak(STDIN_FD, TCSANOW)
+    setcbreak(stdin, TCSANOW)
 
 
 def reenable_input() -> None:
     """enable echoing of characters and delete any queued input to the terminal"""
     if not stdin.closed:
-        tcsetattr(STDIN_FD, TCSAFLUSH, tcgetattr(STDIN_FD))
+        tcsetattr(stdin, TCSAFLUSH, tcgetattr(stdin))
 
 
 def get_term_width() -> int:

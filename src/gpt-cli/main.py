@@ -3,7 +3,7 @@ from typing import Optional, Annotated
 from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
 
-from config import default_system_message
+from config import default_system_message, default_max_tokens
 from prompt import Prompt
 from models import OpenAIModel, AnthropicModel
 from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
@@ -51,10 +51,12 @@ def main(
     system_message: Annotated[Optional[str], Option(help="Heavily influences responses from model")] = default_system_message,
     code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
+    max_tokens: Annotated[int, Option(help="Maximum length of each response")] = default_max_tokens
 ):
     model_args = dict(
         name=model,
-        system_message=system_message
+        system_message=system_message,
+        max_tokens=max_tokens
     )
     if model in OpenAIModel.model_names:
         llm = OpenAIModel(**model_args)
@@ -66,6 +68,7 @@ def main(
         text_color.casefold(),
         code_theme.casefold(),
     )
+    _prompt.render_greeting()
     _prompt.run(prompt)
 
 # fmt: on

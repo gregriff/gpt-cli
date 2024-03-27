@@ -12,14 +12,14 @@ from config import MODELS_AND_PRICES, CONFIG
 class LLM(ABC):
     """Encapsulates common functionality of OpenAI and Anthropic chat completion APIs"""
 
-    def __init__(self, name: str, api_key: str, system_message: str):
+    def __init__(self, name: str, api_key: str, system_message: str, max_tokens: int):
         self.model_name = name
         self.api_key = api_key
         self.system_message = system_message
         self.prices_per_token: Callable[[str], dict[str, float]] = (
             lambda key: MODELS_AND_PRICES.get(key)[name]
         )
-        self.prompt_arguments = {"max_tokens": 1000, "model": name}
+        self.prompt_arguments = {"max_tokens": max_tokens, "model": name}
         self.messages = []
 
     @abstractmethod
@@ -41,12 +41,12 @@ class LLM(ABC):
 class AnthropicModel(LLM):
     model_names = list(MODELS_AND_PRICES["anthropic"].keys())
 
-    def __init__(self, name: str, system_message: str):
+    def __init__(self, name: str, system_message: str, max_tokens: int):
         if (api_key := CONFIG.get("anthropicAPIKey")) is None:
             raise EnvironmentError(
                 'Missing value for "anthropicAPIKey" in file env.json'
             )
-        super().__init__(name, api_key, system_message)
+        super().__init__(name, api_key, system_message, max_tokens)
         self.client = Anthropic(api_key=api_key)
         self.usage = Usage(input_tokens=0, output_tokens=0)
         self.prices_per_token = self.prices_per_token("anthropic")
@@ -79,10 +79,10 @@ class OpenAIModel(LLM):
         "temperature": 0.7,
     }
 
-    def __init__(self, name: str, system_message: str):
+    def __init__(self, name: str, system_message: str, max_tokens: int):
         if (api_key := CONFIG.get("openaiAPIKey")) is None:
             raise EnvironmentError('Missing value for "openaiAPIKey" in file env.json')
-        super().__init__(name, api_key, system_message)
+        super().__init__(name, api_key, system_message, max_tokens)
         self.client = OpenAI(api_key=api_key)
         self.prompt_arguments.update(self.openai_prompt_args)
         self.prices_per_token = self.prices_per_token("openai")

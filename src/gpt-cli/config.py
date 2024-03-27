@@ -8,6 +8,7 @@ with open(env_file) as file:
     CONFIG: dict = load(file)
 
 default_system_message = "You are a concise assistant to a software engineer"
+default_max_tokens = 1000
 
 MODELS_AND_PRICES = {
     "openai": {  # https://openai.com/pricing#language-models

@@ -28,6 +28,8 @@ class Prompt:
         text_color: str,
         code_theme: str,
     ):
+        if not stdin.isatty():
+            raise NotImplementedError("Pipe support coming soon")
         self.model = model
         self.count = 0
         self.tokens = 0
@@ -57,15 +59,6 @@ class Prompt:
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
         # fmt: off
-        system("clear")
-        greeting_left = Text(GREETING_TEXT, justify="left", style=GREETING_PANEL_TEXT_STYLE)
-        greeting_right = Text(f"{self.model.model_name}", justify="right", style=GREETING_PANEL_TEXT_STYLE)
-
-        # Create a panel with the help text, you can customize the box style
-        columns = Columns([greeting_left, greeting_right], expand=True)
-        panel = Panel(columns, box=box.ROUNDED, style=GREETING_PANEL_OUTLINE_STYLE, title_align="left")
-        self.console.print(panel)
-
         while True:
             try:
                 # TODO: add "raw" mode for one-shot unformatted outputs, for scripting
@@ -132,6 +125,25 @@ class Prompt:
             style=COST_STYLE,
         )
         exit(0)
+
+    def render_greeting(self):
+        system("clear")
+        greeting_left = Text(
+            GREETING_TEXT, justify="left", style=GREETING_PANEL_TEXT_STYLE
+        )
+        greeting_right = Text(
+            f"{self.model.model_name}", justify="right", style=GREETING_PANEL_TEXT_STYLE
+        )
+
+        # Create a panel with the help text, you can customize the box style
+        columns = Columns([greeting_left, greeting_right], expand=True)
+        panel = Panel(
+            columns,
+            box=box.ROUNDED,
+            style=GREETING_PANEL_OUTLINE_STYLE,
+            title_align="left",
+        )
+        self.console.print(panel)
 
     def enable_multiline(self) -> None:
         print(
