@@ -23,6 +23,7 @@ CLEAR_HISTORY_STYLE = "dim bold blue"
 ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
 SPINNER = "dots"  # Run `python -m rich.spinner` to see all options
+SPINNER_STYLE = "ansibrightcyan"
 
 ### Output
 MARKDOWN_CODE = "bold blue"  # cool themes: stata-dark. dracula. native. inkpot. vim.

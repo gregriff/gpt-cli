@@ -6,7 +6,7 @@ from rich.markdown import Markdown
 from rich.style import Style
 from rich.live import Live
 
-from styling import SPINNER
+from styling import SPINNER, SPINNER_STYLE
 
 
 class Output:
@@ -23,7 +23,7 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.loading_response = True
-        self.spinner = status.Status("", spinner=SPINNER)
+        self.spinner = status.Status("", spinner=SPINNER, spinner_style=SPINNER_STYLE)
 
     def __enter__(self) -> Self:
         self.spinner.__enter__()
