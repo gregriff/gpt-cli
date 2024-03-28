@@ -64,6 +64,7 @@ class AnthropicModel(LLM):
             self.messages.append(
                 {"role": "assistant", "content": stream.get_final_text()}
             )
+            self.prompt_count += 1
 
     def get_cost_of_current_chat(self):
         return (
@@ -107,6 +108,7 @@ class OpenAIModel(LLM):
                 full_response += text
                 yield text
         self.messages.append({"role": "assistant", "content": full_response})
+        self.prompt_count += 1
 
     def get_cost_of_current_chat(self):
         """
