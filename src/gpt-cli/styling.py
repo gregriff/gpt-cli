@@ -26,9 +26,12 @@ SPINNER = "dots"  # Run `python -m rich.spinner` to see all options
 SPINNER_STYLE = "ansibrightcyan"
 
 ### Output
-MARKDOWN_CODE = "bold blue"  # cool themes: stata-dark. dracula. native. inkpot. vim.
+MARKDOWN_CODE = "bold blue"
 DEFAULT_TEXT_COLOR = "green"
-DEFAULT_CODE_THEME = "native"  # any pygments code theme: https://pygments.org/styles/
+
+# any pygments code theme: https://pygments.org/styles/
+# cool themes: stata-dark. dracula. native. inkpot. vim.
+DEFAULT_CODE_THEME = "native"
 
 
 def md_theme(text_color: str):
