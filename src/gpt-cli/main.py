@@ -48,6 +48,7 @@ def main(
     text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
     max_tokens: Annotated[int, Option(help="Maximum length of each response")] = default_max_tokens
 ):
+    # fmt: on
     model_args = dict(
         name=model,
         system_message=system_message,
@@ -58,15 +59,9 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    repl = REPL(
-        llm,
-        text_color.casefold(),
-        code_theme.casefold(),
-    )
+    repl = REPL(llm, text_color.casefold(), code_theme.casefold())
     repl.render_greeting()
     repl.run(prompt)
-
-# fmt: on
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Generator, Callable
+from typing_extensions import override
 
 from anthropic import Anthropic
 from anthropic.types import Usage
@@ -51,6 +52,7 @@ class AnthropicModel(LLM):
         self.usage = Usage(input_tokens=0, output_tokens=0)
         self.prices_per_token = self.prices_per_token("anthropic")
 
+    @override
     def prompt_and_stream_completion(self, prompt):
         self.messages.append({"role": "user", "content": prompt})
         with self.client.messages.stream(
@@ -66,12 +68,14 @@ class AnthropicModel(LLM):
             )
             self.prompt_count += 1
 
+    @override
     def get_cost_of_current_chat(self):
         return (
             self.usage.input_tokens * self.prices_per_token["prompt"]
             + self.usage.output_tokens * self.prices_per_token["response"]
         )
 
+    @override
     def reset(self):
         super().reset()
         self.messages = []
@@ -96,6 +100,7 @@ class OpenAIModel(LLM):
         self.system_message = {"role": "system", "content": system_message}
         self.messages = [self.system_message]
 
+    @override
     def prompt_and_stream_completion(self, prompt):
         self.messages.append({"role": "user", "content": prompt})
         response_stream = self.client.chat.completions.create(
@@ -110,6 +115,7 @@ class OpenAIModel(LLM):
         self.messages.append({"role": "assistant", "content": full_response})
         self.prompt_count += 1
 
+    @override
     def get_cost_of_current_chat(self):
         """
         Custom token counting algorithm using official tokenizer based on code from:
@@ -137,6 +143,7 @@ class OpenAIModel(LLM):
             + num_response_tokens * self.prices_per_token["response"]
         )
 
+    @override
     def reset(self):
         super().reset()
         self.messages = [self.system_message]
