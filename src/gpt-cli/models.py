@@ -21,9 +21,10 @@ class LLM(ABC):
         )
         self.prompt_arguments = {"max_tokens": max_tokens, "model": name}
         self.messages = []
+        self.prompt_count = 0
 
     @abstractmethod
-    def stream_completion(self) -> Generator[str, None, None]:
+    def prompt_and_stream_completion(self, prompt: str) -> Generator[str, None, None]:
         """prompt model with the current chat history and yield partial responses as they come in"""
         pass
 
@@ -35,7 +36,7 @@ class LLM(ABC):
     @abstractmethod
     def reset(self) -> None:
         """clear the state of the current chat"""
-        pass
+        self.prompt_count = 0
 
 
 class AnthropicModel(LLM):
@@ -50,7 +51,8 @@ class AnthropicModel(LLM):
         self.usage = Usage(input_tokens=0, output_tokens=0)
         self.prices_per_token = self.prices_per_token("anthropic")
 
-    def stream_completion(self):
+    def prompt_and_stream_completion(self, prompt):
+        self.messages.append({"role": "user", "content": prompt})
         with self.client.messages.stream(
             messages=self.messages, system=self.system_message, **self.prompt_arguments
         ) as stream:
@@ -67,6 +69,7 @@ class AnthropicModel(LLM):
         )
 
     def reset(self):
+        super().reset()
         self.messages = []
         self.usage.input_tokens, self.usage.output_tokens = 0, 0
 
@@ -89,7 +92,8 @@ class OpenAIModel(LLM):
         self.system_message = {"role": "system", "content": system_message}
         self.messages = [self.system_message]
 
-    def stream_completion(self):
+    def prompt_and_stream_completion(self, prompt):
+        self.messages.append({"role": "user", "content": prompt})
         response_stream = self.client.chat.completions.create(
             messages=self.messages, **self.prompt_arguments
         )
@@ -102,26 +106,29 @@ class OpenAIModel(LLM):
         """
         Custom token counting algorithm using official tokenizer based on code from:
         https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+
+        TODO: create test suite for this. Rough estimates currently
         """
         encoding = encoding_for_model(self.model_name)
         num_prompt_tokens, num_response_tokens = 0, 0
-        tokens_per_message, tokens_per_name = 3, 1
+        prompt_token_overhead, reply_token_overhead = 3, 3
         for message in self.messages:
-            num_prompt_tokens += tokens_per_message
-            for key, data in message.items():
-                num_prompt_tokens += (token_count := len(encoding.encode(data)))
-                if key == "name":
-                    num_prompt_tokens += tokens_per_name
-                if key == "role":
-                    if data == "assistant":
-                        num_response_tokens += token_count
+            role = message.get("role")
+            text = message.get("content")
+            msg_token_count = len(encoding.encode(text))
 
-        # every reply is primed with <|start|>assistant<|message|>
-        num_prompt_tokens += 3
+            if role in ("system", "user"):
+                num_prompt_tokens += msg_token_count + prompt_token_overhead
+            elif role == "assistant":
+                num_response_tokens += msg_token_count + reply_token_overhead
+            else:
+                # role must be "name"?
+                num_prompt_tokens += 1  # from docs
         return (
             num_prompt_tokens * self.prices_per_token["prompt"]
             + num_response_tokens * self.prices_per_token["response"]
         )
 
     def reset(self):
+        super().reset()
         self.messages = [self.system_message]

@@ -1,6 +1,6 @@
 from functools import partial
 from os import system
-from typing import Callable, Self
+from typing import Callable
 
 from openai import OpenAIError
 from anthropic import AnthropicError
@@ -32,7 +32,6 @@ class Prompt:
         if not stdin.isatty():
             self.one_shot_and_quit()
 
-        self.count = 0
         self.tokens = 0
         self.total_cost = 0
         self.multiline = False
@@ -89,10 +88,9 @@ class Prompt:
     def prompt_llm(self, user_input: str) -> None:
         # fmt: off
         self.console.width = get_term_width()  # adjust printing if user has resized their terminal
-        self.model.messages.append({"role": "user", "content": user_input})
         try:
             with Output(self.console, self.color, self.theme) as output:
-                for text in self.model.stream_completion():
+                for text in self.model.prompt_and_stream_completion(user_input):
                     output.print(text)
         except (OpenAIError, AnthropicError) as e:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
@@ -108,17 +106,18 @@ class Prompt:
             else ""
         )
         self.console.print(ending_line, justify="right", style=COST_STYLE)
-        self.count += 1
         self.multiline = False
 
     def clear_history(self) -> None:
         self.console.width = get_term_width()
         system("clear")
-        message = f"history cleared: {self.count} {'prompt' if self.count == 1 else 'prompts'} total"
+        count = self.model.prompt_count
+        message = (
+            f"history cleared: {count} {'prompt' if count == 1 else 'prompts'} total"
+        )
         self.console.print(message, justify="right", style=CLEAR_HISTORY_STYLE)
         self.total_cost += self.model.get_cost_of_current_chat()
         self.model.reset()
-        self.count = 0
 
     def exit_program(self) -> None:
         print(CLEAR_CURRENT_LINE)
@@ -164,9 +163,8 @@ class Prompt:
         """Take a prompt from stdin (most likely a unix pipe), print model output to stdout and exit program"""
         output = ""
         prompt = stdin.read().strip()
-        self.model.messages.append({"role": "user", "content": prompt})
         try:
-            for text in self.model.stream_completion():
+            for text in self.model.prompt_and_stream_completion(prompt):
                 output += text
             print(output, flush=True)
         except:
