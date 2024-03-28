@@ -4,7 +4,7 @@ from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
 
 from config import default_system_message, default_max_tokens
-from prompt import Prompt
+from repl import REPL
 from models import OpenAIModel, AnthropicModel
 from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
 
@@ -29,18 +29,13 @@ def validate_llm_model(value: str):
 #  - BETTER ERROR HANDLING from API docs
 #  -
 #  CLI features
-#  - one word for argv[2] needs to be treated as an argument and not a prompt
-#  - more commands:
-#  - argv[2] command alias for models ex. `llm opus`:
-#       impl this by hardcoding aliases, then searching model keys for the alias substring
+#  - use regex for validation of -m option value to choose between models
 #  - `llm update` fetches updated models from sources
 #  - `llm list` lists available models
-#  - `llm -m[--model] [model_name]` use specified model for this session
 #  - instructions for keyboard shortcuts in help menu
-#  - pipe support. research how to capture stdin as soon as app starts, --pipe option to output raw response and quit
 #  -
 #   long term todos:
-#   - DOCKER BUILD, ruff, uv, pipx?
+#   - DOCKER BUILD, ruff, uv
 # fmt: off
 
 
@@ -63,7 +58,7 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    repl = Prompt(
+    repl = REPL(
         llm,
         text_color.casefold(),
         code_theme.casefold(),

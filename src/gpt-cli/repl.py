@@ -21,7 +21,7 @@ from models import LLM
 from styling import *
 
 
-class Prompt:
+class REPL:
     def __init__(
         self,
         model: LLM,
@@ -65,13 +65,12 @@ class Prompt:
         # fmt: off
         while True:
             try:
-                # TODO: add "raw" mode for one-shot unformatted outputs, for scripting
                 if (user_input := initial_prompt) is None:
                     style = MULTILINE_PROMPT_STYLE if self.multiline else PROMPT_STYLE
                     user_input = self.session.prompt(PROMPT_LEAD, style=style, multiline=self.multiline).strip()
+                    if not user_input:
+                        continue  # prevent API error
                 disable_input()
-                if not user_input:
-                    continue  # prevent API error
                 cleaned_input = user_input.casefold()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -86,8 +85,9 @@ class Prompt:
         # fmt: on
 
     def prompt_llm(self, user_input: str) -> None:
-        # fmt: off
-        self.console.width = get_term_width()  # adjust printing if user has resized their terminal
+
+        # adjust printing if user has resized their terminal
+        self.console.width = get_term_width()
         try:
             with Output(self.console, self.color, self.theme) as output:
                 for text in self.model.prompt_and_stream_completion(user_input):
@@ -95,11 +95,7 @@ class Prompt:
         except (OpenAIError, AnthropicError) as e:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
-        # fmt: on
 
-        self.model.messages.append(
-            {"role": "assistant", "content": output.full_response}
-        )
         ending_line = (
             f"Price: ${total_cost:.3f}"
             if (total_cost := self.model.get_cost_of_current_chat() >= 0.01)
@@ -109,12 +105,10 @@ class Prompt:
         self.multiline = False
 
     def clear_history(self) -> None:
+        """add to the running total the price of the current chat thread and reset model state"""
         self.console.width = get_term_width()
         system("clear")
-        count = self.model.prompt_count
-        message = (
-            f"history cleared: {count} {'prompt' if count == 1 else 'prompts'} total"
-        )
+        message = f"history cleared: {self.model.prompt_count} {'prompt' if self.model.prompt_count == 1 else 'prompts'} total"
         self.console.print(message, justify="right", style=CLEAR_HISTORY_STYLE)
         self.total_cost += self.model.get_cost_of_current_chat()
         self.model.reset()

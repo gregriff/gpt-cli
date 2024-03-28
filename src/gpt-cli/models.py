@@ -61,6 +61,9 @@ class AnthropicModel(LLM):
             token_counts = stream.get_final_message().usage
             self.usage.input_tokens += token_counts.input_tokens
             self.usage.output_tokens += token_counts.output_tokens
+            self.messages.append(
+                {"role": "assistant", "content": stream.get_final_text()}
+            )
 
     def get_cost_of_current_chat(self):
         return (
@@ -98,9 +101,12 @@ class OpenAIModel(LLM):
             messages=self.messages, **self.prompt_arguments
         )
 
+        full_response = ""
         for chunk in response_stream:
             if (text := chunk.choices[0].delta.content) is not None:
+                full_response += text
                 yield text
+        self.messages.append({"role": "assistant", "content": full_response})
 
     def get_cost_of_current_chat(self):
         """

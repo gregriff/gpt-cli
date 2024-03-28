@@ -4,7 +4,6 @@ from rich import status
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.style import Style
-from rich.text import Text
 from rich.live import Live
 
 from styling import SPINNER
