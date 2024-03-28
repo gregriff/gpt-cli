@@ -1,6 +1,6 @@
 from functools import partial
 from os import system
-from typing import Callable
+from typing import Callable, Self
 
 from openai import OpenAIError
 from anthropic import AnthropicError
@@ -43,6 +43,7 @@ class Prompt:
             editing_mode=EditingMode.VI, key_bindings=self.bindings
         )
         self.console = Console(width=get_term_width(), theme=md_theme(text_color))
+        self.console.set_window_title(self.model.model_name)
 
         self.color = Style.parse(text_color)
         self.theme = code_theme

@@ -63,13 +63,13 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    _prompt = Prompt(
+    repl = Prompt(
         llm,
         text_color.casefold(),
         code_theme.casefold(),
     )
-    _prompt.render_greeting()
-    _prompt.run(prompt)
+    repl.render_greeting()
+    repl.run(prompt)
 
 # fmt: on
 

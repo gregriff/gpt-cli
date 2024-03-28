@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 
 from rich import status
 from rich.console import Console
@@ -24,18 +24,10 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.loading_response = True
-
-        # TODO: ensure this is properly integrated with live display to avoid cursor issues
         self.spinner = status.Status("", spinner=SPINNER)
 
-    def __enter__(self) -> "Output":
+    def __enter__(self) -> Self:
         self.spinner.__enter__()
-        self.live = Live(
-            console=self.console,
-            auto_refresh=False,
-            vertical_overflow="ellipsis",
-        )
-        self.live.__enter__()
         self.console.print()
         return self
 
@@ -43,28 +35,24 @@ class Output:
         self.live.__exit__(*args)
         self.console.print()
 
-    def print(self, text: str, markdown=True):
-        if self.loading_response:
-            self.loading_response = False
+    def print(self, text: str):
+        if self.loading_response:  # this will only run once, on first API reply
+            # must exit this before starting Live or else cursor glitches out
             self.spinner.__exit__(None, None, None)
+            self.live = Live(
+                console=self.console,
+                auto_refresh=False,
+                vertical_overflow="ellipsis",
+            )
+            self.loading_response = False
+            self.live.__enter__()
+
         self.full_response += text
-        if markdown:
-            self.live.update(
-                Markdown(
-                    self.full_response,
-                    code_theme=self.pygments_code_theme,
-                    style=self.color,
-                ),
-                refresh=True,
-            )
-        else:
-            self.console.print(
-                Text(
-                    text,
-                    style=self.color,
-                    overflow="ignore",
-                ),
-                soft_wrap=True,
-                end="",
-            )
-            self.live.refresh()
+        self.live.update(
+            Markdown(
+                self.full_response,
+                code_theme=self.pygments_code_theme,
+                style=self.color,
+            ),
+            refresh=True,
+        )
