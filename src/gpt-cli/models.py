@@ -43,9 +43,8 @@ class AnthropicModel(LLM):
 
     def __init__(self, name: str, system_message: str, max_tokens: int):
         if (api_key := CONFIG.get("anthropicAPIKey")) is None:
-            raise EnvironmentError(
-                'Missing value for "anthropicAPIKey" in file env.json'
-            )
+            print('Missing value for "anthropicAPIKey" in file env.json')
+            exit(1)
         super().__init__(name, api_key, system_message, max_tokens)
         self.client = Anthropic(api_key=api_key)
         self.usage = Usage(input_tokens=0, output_tokens=0)
@@ -81,7 +80,8 @@ class OpenAIModel(LLM):
 
     def __init__(self, name: str, system_message: str, max_tokens: int):
         if (api_key := CONFIG.get("openaiAPIKey")) is None:
-            raise EnvironmentError('Missing value for "openaiAPIKey" in file env.json')
+            print('Missing value for "openaiAPIKey" in file env.json')
+            exit(1)
         super().__init__(name, api_key, system_message, max_tokens)
         self.client = OpenAI(api_key=api_key)
         self.prompt_arguments.update(self.openai_prompt_args)

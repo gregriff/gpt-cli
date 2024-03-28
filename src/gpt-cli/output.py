@@ -36,6 +36,7 @@ class Output:
             vertical_overflow="ellipsis",
         )
         self.live.__enter__()
+        self.console.print()
         return self
 
     def __exit__(self, *args):

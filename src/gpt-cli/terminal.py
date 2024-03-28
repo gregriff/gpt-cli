@@ -27,5 +27,5 @@ def reenable_input() -> None:
 
 
 def get_term_width() -> int:
-    """width in columns of terminal"""
+    """width of terminal in columns"""
     return get_terminal_size().columns
