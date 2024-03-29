@@ -96,9 +96,10 @@ class REPL:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
 
+        # TODO: put this into its own method, display costs <$1 in cents
         ending_line = (
             f"Price: ${total_cost:.3f}"
-            if (total_cost := self.model.get_cost_of_current_chat() >= 0.01)
+            if ((total_cost := self.model.get_cost_of_current_chat()) >= 0.01)
             else ""
         )
         self.console.print(ending_line, justify="right", style=COST_STYLE)
