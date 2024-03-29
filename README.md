@@ -2,12 +2,24 @@
 
 ![preview](./screenshot.png?raw=true)
 
+---
+
 ## Overview
 
-The basic features of the ChatGPT web interface, in a terminal!. Includes markdown rendering, streamed responses, ability to clear chat history, and control of model settings via command line arguments.
+Access the most powerful LLMs from within the terminal. 
 
-I created this out of curiosity of CLI development and because of the lack of free and convenient interfaces to GPT-4.
-Now a staple in my daily workflow as a rubber duck debugger, I have found this CLI works great in a terminal tab within one's IDE.
+##### Main Features
+
+- Streamed responses with full Markdown rendering and [syntax highlighting](https://pygments.org/styles/)
+- _Purposefully_ minimal UI/UX with configurable styling
+- Support for OpenAI and Anthropic models, with [more](https://docs.databricks.com/en/machine-learning/foundation-models/index.html#pay-per-token-foundation-model-apis
+) coming soon (Mixtral, DBRX)
+  - Easily choose model with CLI option and API key
+  - Highly extensible implementation
+- Top-class terminal integration via escape codes
+
+I created this out of curiosity of CLI/TUI development and because of the lack of free and convenient interfaces to GPT-4.
+Now a staple in my daily workflow as a rubber duck debugger and google alternative, I have found this TUI works great within one's IDE.
 
 ## Installation and Recommended Setup
 
@@ -75,10 +87,14 @@ I recommend doing this whenever you want to ask the model a different line of qu
 
 Once your current conversation costs more than a cent or two, it will be shown at the end of the response so that you know how much you're spending. Total session cost will also be shown when the program exits.
 
-The pricing for the GPT turbo models is pretty [cheap](https://openai.com/pricing), and I use the official [tokenizer](https://github.com/openai/tiktoken) to count the tokens, so it should be accurate. Other than the Opus model, Anthropic's offerings are comparatively even cheaper.
+> Disclaimer: 
+>  While I do use the official OpenAI [tokenizer](https://github.com/openai/tiktoken) and an official cookbook example from that repo to calculate prices,
+> it is not something I have tested thoroughly, so there is no guarantee the prices are accurate. Anthropic provides authoritative token counts however, so those should be calculated better 
+
+The pricing for the GPT turbo models is pretty [cheap](https://openai.com/pricing). Other than the Opus model, Anthropic's offerings are comparatively even cheaper.
 For clarity, both OpenAI and Anthropic bill you on tokens per request AND response, and the entire chat history of previous prompts and responses are sent in EACH request. As long as you remember to clear your history after a few prompts you will be fine.
 
-If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). This is the difference between this project and [elia](https://github.com/darrenburns/elia).
+If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). This is the difference between this project and [elia](https://github.com/darrenburns/elia), as per the Unix philosophy. While on the topic, Unix pipes are supported.
 
 ## Development
 
@@ -88,11 +104,6 @@ Feature requests are more than welcome, however I will probably take a while to 
 
 ##### Planned Features:
 
+- Ensure the code-base is highly extensible
 - Support for other LLMs if any seem worth adding
-- Incorporate cutting-edge tooling like [uv](https://github.com/astral-sh/uv) and [Ruff](https://github.com/astral-sh/ruff). 
-
-## Notable dependencies and references
-
-- [Typer](https://typer.tiangolo.com/)
-- [Prompt Toolkit](https://python-prompt-toolkit.readthedocs.io/en/master/)
-- [Similar project by kharvd](https://github.com/kharvd/gpt-cli/tree/main)
+- Incorporate cutting-edge tooling like [uv](https://github.com/astral-sh/uv) and [Ruff](https://github.com/astral-sh/ruff).

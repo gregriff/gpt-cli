@@ -13,10 +13,10 @@ class Output:
     """
     Encapsulates all the data needed to update the terminal with a chat completion generator response
     with markdown formatting
-
-    CREDIT: The general function of this class was inspired by the "StreamingMarkdownPrinter" class from
-    https://github.com/kharvd/gpt-cli
     """
+
+    """CREDIT: The general functionality of this class was taken from the "StreamingMarkdownPrinter" class from
+    https://github.com/kharvd/gpt-cli"""
 
     def __init__(self, console: Console, color: Style, theme):
         self.full_response = ""

@@ -123,6 +123,7 @@ class REPL:
             return
         message = f"cost: {self.get_cost_str(cost)}"
         self.console.print(message, justify="right", style=COST_STYLE)
+        """CREDIT: The idea to print costs on the right was taken from https://github.com/kharvd/gpt-cli"""
 
     def exit_program(self) -> None:
         print(CLEAR_CURRENT_LINE)
