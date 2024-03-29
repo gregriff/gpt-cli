@@ -31,7 +31,10 @@ class LLM(ABC):
 
     @abstractmethod
     def get_cost_of_current_chat(self) -> float:
-        """calculate cost via recommended token counting method and prices pulled from docs"""
+        """
+        calculate cost via recommended token counting method and price per token pulled from docs
+        :returns: cost in dollars ex. 0.03 for 3 cents
+        """
         pass
 
     @abstractmethod

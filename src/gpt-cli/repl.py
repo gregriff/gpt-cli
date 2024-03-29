@@ -96,13 +96,7 @@ class REPL:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
 
-        # TODO: put this into its own method, display costs <$1 in cents
-        ending_line = (
-            f"Price: ${total_cost:.3f}"
-            if ((total_cost := self.model.get_cost_of_current_chat()) >= 0.01)
-            else ""
-        )
-        self.console.print(ending_line, justify="right", style=COST_STYLE)
+        self.print_cost()
         self.multiline = False
 
     def clear_history(self) -> None:
@@ -114,12 +108,28 @@ class REPL:
         self.total_cost += self.model.get_cost_of_current_chat()
         self.model.reset()
 
+    @staticmethod
+    def get_cost_str(cost: float) -> str:
+        """given a cost in dollars, return a formatted string to be printed to screen"""
+        if cost >= 1.0:
+            return f"${cost:.2f}"
+        elif cost < 0.0005:
+            return f"less than \u2152 \u00A2"
+        else:
+            return f"{cost * 100:.1f} \u00A2"
+
+    def print_cost(self) -> None:
+        if (cost := self.model.get_cost_of_current_chat()) < 0.01:
+            return
+        message = f"cost: {self.get_cost_str(cost)}"
+        self.console.print(message, justify="right", style=COST_STYLE)
+
     def exit_program(self) -> None:
         print(CLEAR_CURRENT_LINE)
         self.console.width = get_term_width()
         system("clear")
         self.total_cost += self.model.get_cost_of_current_chat()
-        message = f"total cost of last session: ${self.total_cost:.3f}"
+        message = f"total session cost: {self.get_cost_str(self.total_cost)}"
         self.console.print(
             message,
             justify="right",
