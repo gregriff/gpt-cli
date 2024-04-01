@@ -71,7 +71,7 @@ class REPL:
                     if not user_input:
                         continue  # prevent API error
                 disable_input()
-                cleaned_input = user_input.casefold()
+                cleaned_input = user_input.lower()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
             except KeyboardInterrupt:
@@ -116,7 +116,7 @@ class REPL:
         elif cost < 0.0005:
             return f"less than \u2152 \u00A2"
         else:
-            return f"{cost * 100:.1f} \u00A2"
+            return f"{cost * 100:.1f}\u00A2"
 
     def print_cost(self) -> None:
         if (cost := self.model.get_cost_of_current_chat()) < 0.01:
@@ -130,7 +130,7 @@ class REPL:
         self.console.width = get_term_width()
         system("clear")
         self.total_cost += self.model.get_cost_of_current_chat()
-        message = f"total session cost: {self.get_cost_str(self.total_cost)}"
+        message = f"session cost: {self.get_cost_str(self.total_cost)}"
         self.console.print(
             message,
             justify="right",

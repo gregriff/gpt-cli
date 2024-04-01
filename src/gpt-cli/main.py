@@ -1,5 +1,6 @@
 from typing import Optional, Annotated
 
+from rapidfuzz import process, fuzz
 from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
 
@@ -18,18 +19,22 @@ def validate_code_styles(value: str):
 
 
 def validate_llm_model(value: str):
-    if value not in (
-        valid_models := OpenAIModel.model_names + AnthropicModel.model_names
-    ):
+    """use fuzzy matching to choose model from user input"""
+    valid_models = OpenAIModel.model_names + AnthropicModel.model_names
+    closest_model, score, _ = process.extractOne(
+        value, valid_models, scorer=fuzz.WRatio
+    )
+
+    # tweak this as needed
+    if score < 75:
         raise BadParameter(f"{value} \n\nChoose from {valid_models}")
-    return value
+    return closest_model
 
 
 # TODO:
 #  - BETTER ERROR HANDLING from API docs
 #  -
 #  CLI features
-#  - use regex for validation of -m option value to choose between models
 #  - `llm update` fetches updated models from sources
 #  - `llm list` lists available models
 #  - instructions for keyboard shortcuts in help menu
@@ -59,7 +64,7 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    repl = REPL(llm, text_color.casefold(), code_theme.casefold())
+    repl = REPL(llm, text_color.lower(), code_theme.lower())
     repl.render_greeting()
     repl.run(prompt)
 
