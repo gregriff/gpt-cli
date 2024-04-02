@@ -7,7 +7,7 @@ from rich.padding import Padding
 from rich.style import Style
 from rich.live import Live
 
-from styling import SPINNER, SPINNER_STYLE
+from styling import SPINNER, SPINNER_STYLE, OUTPUT_PADDING
 
 
 class Output:
@@ -16,8 +16,8 @@ class Output:
     with markdown formatting
     """
 
-    """CREDIT: The general functionality of this class was taken from the "StreamingMarkdownPrinter" class from
-    https://github.com/kharvd/gpt-cli"""
+    """CREDIT: The idea and implementation to print text in markdown live, as it gets sent from server,
+    was taken from the "StreamingMarkdownPrinter" class from https://github.com/kharvd/gpt-cli"""
 
     def __init__(self, console: Console, color: Style, theme: str):
         self.full_response = ""
@@ -27,9 +27,8 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.loading_response = True
-        self.padding = 0, 1, 0, 0  # css style
         self.spinner = status.Status(
-            Padding("", self.padding), spinner=SPINNER, spinner_style=SPINNER_STYLE
+            Padding("", OUTPUT_PADDING), spinner=SPINNER, spinner_style=SPINNER_STYLE
         )
 
     def __enter__(self) -> Self:
@@ -63,7 +62,7 @@ class Output:
                     code_theme=self.pygments_code_theme,
                     style=self.color,
                 ),
-                self.padding,
+                OUTPUT_PADDING,
             ),
             refresh=True,
         )

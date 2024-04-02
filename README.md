@@ -19,7 +19,7 @@ Access the most powerful LLMs from within the terminal.
 - Top-class terminal integration via escape codes
 
 I created this out of curiosity of CLI/TUI development and because of the lack of free and convenient interfaces to GPT-4.
-Now a staple in my daily workflow as a rubber duck debugger and google alternative, I have found this TUI works great within one's IDE.
+Now a staple in my daily workflow as a rubber duck debugger and google alternative, I have found this CLI works great within one's IDE.
 
 ## Installation and Recommended Setup
 

@@ -129,6 +129,9 @@ class OpenAIModel(LLM):
         encoding = encoding_for_model(self.model_name)
         num_prompt_tokens, num_response_tokens = 0, 0
         prompt_token_overhead, reply_token_overhead = 3, 3
+        if not self.prompt_count:
+            return 0.0
+
         for message in self.messages:
             role = message.get("role")
             text = message.get("content")

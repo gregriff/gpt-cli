@@ -130,13 +130,11 @@ class REPL:
         self.console.width = get_term_width()
         system("clear")
         self.total_cost += self.model.get_cost_of_current_chat()
-        message = f"session cost: {self.get_cost_str(self.total_cost)}"
-        self.console.print(
-            message,
-            justify="right",
-            style=COST_STYLE,
-        )
+        # fmt: off
+        message = f"session cost: {self.get_cost_str(self.total_cost)}" if self.total_cost else ""
+        self.console.print(message, justify="right", style=COST_STYLE)
         exit(0)
+        # fmt: on
 
     def render_greeting(self) -> None:
         system("clear")

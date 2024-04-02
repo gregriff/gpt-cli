@@ -23,11 +23,13 @@ CLEAR_HISTORY_STYLE = "dim bold blue"
 ERROR_STYLE = "yellow"
 COST_STYLE = "dim"
 SPINNER = "point"  # Run `python -m rich.spinner` to see all options
-SPINNER_STYLE = "dim green"
+SPINNER_STYLE = ""
 
 ### Output
 MARKDOWN_CODE = "bold blue"
 DEFAULT_TEXT_COLOR = "green"
+OUTPUT_PADDING = 0, 1, 0, 0  # css format, units in terminal columns
+# known issue, padding of spinner is incomplete
 
 # any pygments code theme: https://pygments.org/styles/
 # cool themes: stata-dark. dracula. native. inkpot. vim.
