@@ -1,6 +1,6 @@
 # gpt-cli
 
-![preview](./screenshot.png?raw=true)
+![preview](./docs/overview.gif)
 
 ---
 
