@@ -1,10 +1,13 @@
 from typing import Optional, Annotated
 
+from rapidfuzz import process, fuzz
 from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
 
-from config import CONFIG, default_system_message, prompt_arguments
-from prompt import Prompt
+from config import default_system_message, default_max_tokens, default_model
+from repl import REPL
+from models import OpenAIModel, AnthropicModel
+from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
 
 app = Typer(name="gpt-cli", add_completion=False)
 
@@ -15,54 +18,63 @@ def validate_code_styles(value: str):
     return value
 
 
-# code_styles = tuple(styles.get_all_styles())
-# CodeStyles = Enum("code styles", code_styles)
+def validate_llm_model(value: str):
+    """use fuzzy matching to choose model from user input"""
+    valid_models = OpenAIModel.model_names + AnthropicModel.model_names
+    closest_model, score, _ = process.extractOne(
+        value, valid_models, scorer=fuzz.WRatio
+    )
+
+    # tweak this as needed
+    if score < 75:
+        raise BadParameter(f"{value} \n\nChoose from {valid_models}")
+    return closest_model
 
 
 # TODO:
-#  -
-#   save feature, use sqlite database:
-#  - META + S to save current chat, option to name it in bottom toolbar
-#  - `llm saved` to list saved chats with # prompts and summaries
-#  - `llm load [tag]` to load the saved chat history of chat [tag], will have to remember which model as well
-#  - `llm delete [tag]`
+#  - BETTER ERROR HANDLING from API docs
+#  - allow env vars in addition to json API keys
+#  - temperature parameter
+#  - if prompttoolkit is using an eventloop regardless of top-level async, install uvloop
+#  - add databrix models using OpenAI class (just change URL)
+#  - let user use models that do not have hardcoded prices. Combine with llm --update to allow use of any API-supported
+#  - model in the future, just without price displays
+#  - look into HTTP options provided by clients to offer better security
+#  - migrate styling config to toml or pkl
 #  -
 #  CLI features
-#  - `llm update` fetches updated models from sources
-#  - `llm list` lists available models
-#  - `llm -m[--model] [model_name]` use specified model for this session
+#  - `llm --update` fetches updated models from sources
+#  - `llm --list` lists available models
 #  - instructions for keyboard shortcuts in help menu
-#  - pipe support. research how to capture stdin as soon as app starts, --pipe option to output raw response and quit
 #  -
 #   long term todos:
-#   - menu commands in bottom toolbar
-
+#   - DOCKER BUILD, ruff, uv
 # fmt: off
+
 
 @app.command()
 def main(
-    prompt: Annotated[str, Argument(help="Quoted text to prompt LLM. Leave blank for fresh REPL", metavar="[PROMPT]")] = None,
-    system_message: Annotated[Optional[str], Option(help="Influences all subsequent output from GPT")] = default_system_message["content"],
-    code_theme: Annotated[Optional[str], Option(callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = "native",
-    text_color: Annotated[str, Option(help="Color of plain text from responses. Most colors supported")] = "green",
-    refresh_rate: Annotated[int,Option("--refresh-rate", "-R", help="Printing frequency from response buffer in Hz")] = 8,
+    model: Annotated[Optional[str], Argument(callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = default_model,
+    prompt: Annotated[str, Option("--prompt", "-p", help="Initial prompt. Omit for fresh REPL")] = None,
+    system_message: Annotated[Optional[str], Option("--system-message", "-s", help="Heavily influences responses from model")] = default_system_message,
+    code_theme: Annotated[Optional[str], Option("--code-theme", "-t", callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
+    text_color: Annotated[str, Option("--text-color", "-c", help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
+    max_tokens: Annotated[int, Option(help="Maximum length of each response")] = default_max_tokens
 ):
-    api_key = CONFIG.get("apiKey")
-
-    default_system_message["content"] = system_message
-
-    # cool themes: stata-dark. dracula. native. inkpot. vim.
-    _prompt = Prompt(
-        text_color.casefold(),
-        code_theme.casefold(),
-        default_system_message,
-        api_key,
-        int(refresh_rate),
-        prompt_arguments,
+    # fmt: on
+    model_args = dict(
+        name=model,
+        system_message=system_message,
+        max_tokens=max_tokens
     )
-    _prompt.run(prompt)
+    if model in OpenAIModel.model_names:
+        llm = OpenAIModel(**model_args)
+    else:
+        llm = AnthropicModel(**model_args)
 
-# fmt: on
+    repl = REPL(llm, text_color.lower(), code_theme.lower())
+    repl.render_greeting()
+    repl.run(prompt)
 
 
 if __name__ == "__main__":

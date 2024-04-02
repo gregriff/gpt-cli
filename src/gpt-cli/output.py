@@ -1,78 +1,68 @@
-from typing import Optional
+from typing import Optional, Self
 
+from rich import status
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.padding import Padding
 from rich.style import Style
-from rich.text import Text
 from rich.live import Live
 
-from terminal import *
-
-
-# TODO: use this for consistency. Eventually load these from db.
-# custom_theme = Theme({
-#     "info": "dim cyan",
-#     "warning": "magenta",
-#     "danger": "bold red"
-# })
-
-
-# def md_theme(text_color: str):
-#     """
-#     Overrides Rich's default text theme with Rich tokens.
-#     Instead of a string, this func could accept a Rich.styles.Style obj
-#     """
-#     return Theme({"markdown": text_color, "markdown.code": "bold blue"})
+from styling import SPINNER, SPINNER_STYLE, OUTPUT_PADDING
 
 
 class Output:
     """
-    Encapsulates all the data needed to update the terminal with a chat completion generator response.
-    Keeps track of how many lines are printed to the screen and pretty-prints everything.
+    Encapsulates all the data needed to update the terminal with a chat completion generator response
+    with markdown formatting
     """
 
-    def __init__(self, console: Console, color: Style, theme, refresh_rate: int):
+    """CREDIT: The idea and implementation to print text in markdown live, as it gets sent from server,
+    was taken from the "StreamingMarkdownPrinter" class from https://github.com/kharvd/gpt-cli"""
+
+    def __init__(self, console: Console, color: Style, theme: str):
         self.full_response = ""
-        self.terminal_width = TERM_WIDTH
 
         self.console = console
         self.live: Optional[Live] = None
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
-        self.refresh_rate = refresh_rate
-
-    def __enter__(self) -> "Output":
-        self.live = Live(
-            console=self.console,
-            refresh_per_second=self.refresh_rate,
-            auto_refresh=False,
-            vertical_overflow="ellipsis",
+        self.loading_response = True
+        self.spinner = status.Status(
+            Padding("", OUTPUT_PADDING), spinner=SPINNER, spinner_style=SPINNER_STYLE
         )
-        self.live.__enter__()
+
+    def __enter__(self) -> Self:
+        self.spinner.__enter__()
+        self.console.print()
         return self
 
     def __exit__(self, *args):
         self.live.__exit__(*args)
         self.console.print()
 
-    def print(self, text: str, markdown=True):
+    def print(self, text: str) -> None:
+        """should only be used to print LLM responses"""
+
+        if self.loading_response:  # this will only run once, on first API reply
+            # must exit this before starting Live or else cursor glitches out
+            self.spinner.__exit__(None, None, None)
+            self.live = Live(
+                console=self.console,
+                auto_refresh=False,
+                vertical_overflow="ellipsis",
+            )
+            self.loading_response = False
+            self.live.__enter__()
+
         self.full_response += text
-        if markdown:
-            self.live.update(
+        self.live.update(
+            Padding(
                 Markdown(
                     self.full_response,
                     code_theme=self.pygments_code_theme,
                     style=self.color,
                 ),
-                refresh=True,
-            )
-        else:
-            self.console.print(
-                Text(
-                    text,
-                    style=self.color,
-                    overflow="ignore",
-                ),
-                soft_wrap=True,
-                end="",
-            )
+                OUTPUT_PADDING,
+            ),
+            refresh=True,
+        )
