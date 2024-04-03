@@ -35,6 +35,7 @@ class REPL:
         self.tokens = 0
         self.total_cost = 0
         self.multiline = False
+        self.left_indent = " " * sum(len(text[1]) for text in PROMPT_LEAD)
 
         self.bindings = KeyBindings()
         # self.bindings.add('c-n')(self.enable_multiline)
@@ -67,7 +68,11 @@ class REPL:
             try:
                 if (user_input := initial_prompt) is None:
                     style = MULTILINE_PROMPT_STYLE if self.multiline else PROMPT_STYLE
-                    user_input = self.session.prompt(PROMPT_LEAD, style=style, multiline=self.multiline).strip()
+                    user_input = self.session.prompt(
+                        PROMPT_LEAD, style=style,
+                        multiline=self.multiline,
+                        prompt_continuation=self.left_indent,
+                    ).strip()
                     if not user_input:
                         continue  # prevent API error
                 disable_input()

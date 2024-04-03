@@ -31,31 +31,13 @@ def validate_llm_model(value: str):
     return closest_model
 
 
-# TODO:
-#  - BETTER ERROR HANDLING from API docs
-#  - allow env vars in addition to json API keys
-#  - temperature parameter
-#  - if prompttoolkit is using an eventloop regardless of top-level async, install uvloop
-#  - add databrix models using OpenAI class (just change URL)
-#  - let user use models that do not have hardcoded prices. Combine with llm --update to allow use of any API-supported
-#  - model in the future, just without price displays
-#  - look into HTTP options provided by clients to offer better security
-#  - migrate styling config to toml or pkl
-#  -
-#  CLI features
-#  - `llm --update` fetches updated models from sources
-#  - `llm --list` lists available models
-#  - instructions for keyboard shortcuts in help menu
-#  -
-#   long term todos:
-#   - DOCKER BUILD, ruff, uv
 # fmt: off
 
 
 @app.command()
 def main(
     model: Annotated[Optional[str], Argument(callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = default_model,
-    prompt: Annotated[str, Option("--prompt", "-p", help="Initial prompt. Omit for fresh REPL")] = None,
+    prompt: Annotated[str, Option("--prompt", "-p", help="Initial prompt. Omit for blank REPL")] = None,
     system_message: Annotated[Optional[str], Option("--system-message", "-s", help="Heavily influences responses from model")] = default_system_message,
     code_theme: Annotated[Optional[str], Option("--code-theme", "-t", callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
     text_color: Annotated[str, Option("--text-color", "-c", help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,

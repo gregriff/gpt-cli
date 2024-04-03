@@ -11,7 +11,7 @@ Access the most powerful LLMs from within the terminal.
 ##### Main Features
 
 - Streamed responses with full Markdown rendering and [syntax highlighting](https://pygments.org/styles/)
-- _Purposefully_ minimal UI/UX with configurable styling
+- Intentionally minimal UI/UX with configurable styling
 - Support for OpenAI and Anthropic models, with [more](https://docs.databricks.com/en/machine-learning/foundation-models/index.html#pay-per-token-foundation-model-apis
 ) coming soon (Mixtral, DBRX)
   - Easily choose model with CLI option and API key
@@ -31,8 +31,9 @@ so ensure you have an account with money loaded before using the CLI.
 > **Sign up for OpenAI [here](https://platform.openai.com/account/api-keys) and Anthropic [here](https://www.anthropic.com/api)**.
 
 
-Once you have you API keys, place them in a file called `env.json` in the project root directory like so:
+Once you have you API keys, place them in a file named `env.json` in the project root directory like so:
 
+`gpt-cli/env.json`
 ```json
 {
   "openaiAPIKey": "12345678",
@@ -47,14 +48,14 @@ I prefer to install this app's dependencies to the system interpreter so that I 
 3. Add shell alias and reload shell config to apply changes (assuming `bash` or `zsh`):
     ```shell
    config_file="${HOME}/.$(basename ${SHELL})rc" && \
-   echo -e "\nalias llm='python3 ENTER_ABSOLUTE_PATH_TO_src/gpt-cli/main.py_HERE'" >> "${config_file}" && \ 
+   echo -e "\nalias llm='python3 ENTER_ABSOLUTE_PATH_TO_/gpt-cli/src/gpt-cli/main.py_HERE'" >> "${config_file}" && \ 
    source "${config_file}" 
    ```
 Now no matter where your current working directory is, you can type `llm` in your terminal to start a GPT session!
 
 ## Configuration
 
-> Note: All settings are documented in the help page, accessible by running with the help option: `llm --help` (assuming you have the shell alias described above)
+> Note: All settings are documented in the [help page](docs/help.jpg), accessible by running with the help option: `llm --help` (assuming you have the shell alias described above)
 
 ##### System Message
 
@@ -70,13 +71,15 @@ and the color of the plaintext responses can be set to most normal colors using 
 
 ## Usage
 
+![help page](docs/help.jpg)
+
 ###### Controls
 
 The program is a simple REPL. Each time you click _Enter_ your prompt will be sent and the response will be streamed in real time. 
 `CTRL+D` and `CTRL+C` work as expected in a REPL, exiting the program and cancelling the current loop, respectively. Entering `q`, `quit`, `e`, or `exit` while in prompt mode will also exit the program.
 
 When typing a prompt, basic keyboard shortcuts are available like history navigation with the arrow-keys and deleting entire line with `CTRL + U`. More will be added in the future. Multiline text input is supported by entering
-`ml` or "\" (single backslash) into the prompt. This is useful when pasting code into the prompt. 
+`ml` a single backslash into the prompt. This is useful when pasting code into the prompt. 
 
 > When in multiline mode, you must use `Meta + Enter` to submit the prompt. On macOS it is `[Option or Command] + Escape + Enter`
 
@@ -94,7 +97,7 @@ Once your current conversation costs more than a cent or two, it will be shown a
 The pricing for the GPT turbo models is pretty [cheap](https://openai.com/pricing). Other than the Opus model, Anthropic's offerings are comparatively even cheaper.
 For clarity, both OpenAI and Anthropic bill you on tokens per request AND response, and the entire chat history of previous prompts and responses are sent in EACH request. As long as you remember to clear your history after a few prompts you will be fine.
 
-If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). This is the difference between this project and [elia](https://github.com/darrenburns/elia), as per the Unix philosophy. While on the topic, Unix pipes are supported.
+If you want to have multiple sessions, use [screen](https://www.gnu.org/software/screen/manual/screen.html) or [tmux](https://github.com/tmux/tmux/wiki). I want this project to "do one thing well" and leave other features to existing programs. This is the difference between this project and [elia](https://github.com/darrenburns/elia), for example.
 
 ## Development
 
