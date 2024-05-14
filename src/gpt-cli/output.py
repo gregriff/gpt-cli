@@ -27,6 +27,9 @@ class Output:
         self.color = color  # color of normal text
         self.pygments_code_theme = theme
         self.loading_response = True
+
+        # TODO: use status.Status internals to impl padding around spinner, so that we can use left padding. Also pad
+        #   right side of prompt
         self.spinner = status.Status(
             Padding("", OUTPUT_PADDING), spinner=SPINNER, spinner_style=SPINNER_STYLE
         )
