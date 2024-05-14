@@ -7,7 +7,7 @@ env_file = path.join(sys.path[0], "../../env.json")
 with open(env_file) as file:
     CONFIG: dict = load(file)
 
-default_model = "gpt-4-turbo-preview"
+default_model = "gpt-4o"
 default_system_message = "You are a concise assistant to a software engineer"
 default_max_tokens = 1000
 
@@ -20,6 +20,10 @@ MODELS_AND_PRICES = {
         "gpt-4-turbo-preview": {
             "prompt": 10.0 / 1_000_000,
             "response": 30.0 / 1_000_000,
+        },
+        "gpt-4o": {
+            "prompt": 5.0 / 1_000_000,
+            "response": 15.0 / 1_000_000,
         },
     },
     "anthropic": {  # https://www.anthropic.com/api
