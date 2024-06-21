@@ -35,6 +35,10 @@ MODELS_AND_PRICES = {
             "prompt": 3.0 / 1_000_000,
             "response": 15.0 / 1_000_000,
         },
+        "claude-3-5-sonnet-20240620": {
+            "prompt": 3.0 / 1_000_000,
+            "response": 15.0 / 1_000_000,
+        },
         "claude-3-opus-20240229": {
             "prompt": 15.0 / 1_000_000,
             "response": 75.0 / 1_000_000,
