@@ -40,6 +40,8 @@ class Output:
         return self
 
     def __exit__(self, *args):
+        if self.live is None:
+            return  # if user CTRL+D during loading spinner
         self.live.__exit__(*args)
         self.console.print()
 
@@ -59,13 +61,10 @@ class Output:
 
         self.full_response += text
         self.live.update(
-            Padding(
-                Markdown(
-                    self.full_response,
-                    code_theme=self.pygments_code_theme,
-                    style=self.color,
-                ),
-                OUTPUT_PADDING,
+            Markdown(
+                self.full_response,
+                code_theme=self.pygments_code_theme,
+                style=self.color,
             ),
             refresh=True,
         )
