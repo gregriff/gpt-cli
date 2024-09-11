@@ -5,7 +5,7 @@
 lock:
 	./scripts/activate_venv.sh && \
 	python -m pip install -U pip pip-tools && \
-	pip-compile --generate-hashes --output-file requirements.txt requirements.in
+	pip-compile -U --generate-hashes --output-file requirements.txt requirements.in
 
 
 # install python packages from lockfile
