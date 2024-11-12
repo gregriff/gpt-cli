@@ -27,15 +27,11 @@ MODELS_AND_PRICES = {
         },
     },
     "anthropic": {  # https://www.anthropic.com/api
-        "claude-3-haiku-20240307": {
+        "claude-3-haiku-20241022": {
             "prompt": 0.25 / 1_000_000,
             "response": 1.25 / 1_000_000,
         },
-        "claude-3-sonnet-20240229": {
-            "prompt": 3.0 / 1_000_000,
-            "response": 15.0 / 1_000_000,
-        },
-        "claude-3-5-sonnet-20240620": {
+        "claude-3-5-sonnet-20241022": {
             "prompt": 3.0 / 1_000_000,
             "response": 15.0 / 1_000_000,
         },
