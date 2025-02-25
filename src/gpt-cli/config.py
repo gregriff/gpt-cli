@@ -7,7 +7,7 @@ env_file = path.join(sys.path[0], "../../env.json")
 with open(env_file) as file:
     CONFIG: dict = load(file)
 
-default_model = "gpt-4o"
+default_model = "claude-3-7-sonnet-latest"
 default_system_message = "You are a concise assistant to a software engineer"
 default_max_tokens = 1000
 
@@ -31,7 +31,7 @@ MODELS_AND_PRICES = {
             "prompt": 0.25 / 1_000_000,
             "response": 1.25 / 1_000_000,
         },
-        "claude-3-5-sonnet-20241022": {
+        "claude-3-7-sonnet-latest": {
             "prompt": 3.0 / 1_000_000,
             "response": 15.0 / 1_000_000,
         },
