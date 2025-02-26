@@ -28,8 +28,6 @@ from terminal import (
     CLEAR_COMMANDS,
     CLEAR_CURRENT_LINE,
     EXIT_COMMANDS,
-    MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS,
-    MULTILINE_COMMANDS,
     disable_input,
     get_term_width,
     reenable_input,
@@ -63,7 +61,6 @@ class REPL:
             for keywords, function in [
                 (EXIT_COMMANDS, self.exit_program),
                 (CLEAR_COMMANDS, self.clear_history),
-                (MULTILINE_COMMANDS, self.enable_multiline),
             ]
             for kw in keywords
         }
@@ -162,14 +159,6 @@ class REPL:
             title_align="left",
         )
         self.console.print(panel)
-
-    def enable_multiline(self) -> None:
-        print(
-            MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS,
-            CLEAR_CURRENT_LINE,
-            end="",
-        )
-        self.multiline = True
 
     def one_shot_and_quit(self) -> None:
         """Take a prompt from stdin (most likely a unix pipe), print model output to stdout and exit program"""
