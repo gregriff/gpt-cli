@@ -43,7 +43,7 @@ Once you have you API keys, place them in a file named `env.json` in the project
 I prefer to install this app's dependencies to the system interpreter so that I can use a shell alias to run it at any time with no prior venv set up. In the terminal:
 
 1. Ensure you are not using a venv: run `deactivate`
-2. After cloning and inside the project directory, run `python -m pip install .` to download all python packages.
+2. After cloning and inside the project directory, run `python -m pip install -r requirements.txt` to download all python packages.
 3. Add shell alias and reload shell config to apply changes (assuming `bash` or `zsh`):
     ```shell
    config_file="${HOME}/.$(basename ${SHELL})rc" && \

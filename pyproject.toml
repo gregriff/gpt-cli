@@ -1,7 +1,7 @@
 [project]
 name = "gpt-cli"
 version = "1.1"
-requires-python = ">3.11"
+requires-python = ">= 3.11"
 dependencies = ["openai", "anthropic", "tiktoken", "typer", "rapidfuzz"]
 
 optional-dependencies.dev = ["ruff"]

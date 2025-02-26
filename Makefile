@@ -2,10 +2,10 @@
 
 # use this after adding new packages to pyproject.toml
 lock:
-	uv lock
+	uv pip compile --generate-hashes -o requirements.txt pyproject.toml
 
 install:
-	uv sync
+	uv pip install -r requirements.txt
 
 run:
 	uv run src/main.py
