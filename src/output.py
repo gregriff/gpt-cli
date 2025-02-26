@@ -2,12 +2,12 @@ from typing import Optional, Self
 
 from rich import status
 from rich.console import Console
+from rich.live import Live
 from rich.markdown import Markdown
 from rich.padding import Padding
 from rich.style import Style
-from rich.live import Live
 
-from styling import SPINNER, SPINNER_STYLE, OUTPUT_PADDING
+from styling import OUTPUT_PADDING, SPINNER, SPINNER_STYLE
 
 
 class Output:

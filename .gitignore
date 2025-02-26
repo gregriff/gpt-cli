@@ -1,14 +1,19 @@
 env.json
-src/gpt-cli/env.json
+TODO.md
+
 .idea/
-.venv/
+.zed/
+.vscode
 
 */__pycache__
 __pycache__
 __pycache__/*
+.venv/
+*.egg-info
+
 geckodriver.log
 
 *.DS_Store
 .DS_Store
-.zed/
-.vscode
+
+.ruff_cache

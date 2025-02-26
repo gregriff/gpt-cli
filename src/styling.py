@@ -1,19 +1,9 @@
-from prompt_toolkit.styles import Style as ptkStyle
+from rich.text import Text
 from rich.theme import Theme
 
-# add an entry with a class name of empty string to color user input
-PROMPT_STYLE = ptkStyle(
-    [("primary", "ansibrightcyan"), ("secondary", "ansibrightyellow")]
+PROMPT_LEAD = Text(" ? ", style="cyan") + Text(
+    "> ", justify="left", overflow="fold", style="yellow"
 )
-MULTILINE_PROMPT_STYLE = ptkStyle(
-    [("primary", "ansicyan"), ("secondary", "ansipurple")]
-)
-
-# use the classes above to build a prompt lead
-PROMPT_LEAD = [
-    ("class:primary", "? "),
-    ("class:secondary", "> "),
-]
 
 ### Decorations
 GREETING_TEXT = "gpt-cli"

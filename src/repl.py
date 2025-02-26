@@ -1,24 +1,39 @@
 from functools import partial
 from os import system
+from sys import stdin
 from typing import Callable
 
-from openai import OpenAIError
 from anthropic import AnthropicError
-
-from prompt_toolkit import PromptSession
-from prompt_toolkit.enums import EditingMode
-from prompt_toolkit.key_binding import KeyBindings
+from openai import OpenAIError
 from rich import box
 from rich.columns import Columns
+from rich.console import Console
 from rich.panel import Panel
 from rich.style import Style
-from rich.console import Console
 from rich.text import Text
 
-from terminal import *
-from output import Output
 from models import LLM
-from styling import *
+from output import Output
+from styling import (
+    CLEAR_HISTORY_STYLE,
+    COST_STYLE,
+    ERROR_STYLE,
+    GREETING_PANEL_OUTLINE_STYLE,
+    GREETING_PANEL_TEXT_STYLE,
+    GREETING_TEXT,
+    PROMPT_LEAD,
+    md_theme,
+)
+from terminal import (
+    CLEAR_COMMANDS,
+    CLEAR_CURRENT_LINE,
+    EXIT_COMMANDS,
+    MOVE_UP_ONE_LINE_AND_GOTO_LEFTMOST_POS,
+    MULTILINE_COMMANDS,
+    disable_input,
+    get_term_width,
+    reenable_input,
+)
 
 
 class REPL:
@@ -34,16 +49,10 @@ class REPL:
 
         self.tokens = 0
         self.total_cost = 0
-        self.multiline = False
-        self.left_indent = " " * sum(len(text[1]) for text in PROMPT_LEAD)
 
-        self.bindings = KeyBindings()
-        # self.bindings.add('c-n')(self.enable_multiline)
-        self.session = PromptSession(
-            editing_mode=EditingMode.VI, key_bindings=self.bindings
-        )
         self.console = Console(width=get_term_width(), theme=md_theme(text_color))
         self.console.set_window_title(self.model.model_name)
+        # Prompt.prompt_suffix = ""
 
         self.color = Style.parse(text_color)
         self.theme = code_theme
@@ -59,7 +68,7 @@ class REPL:
             for kw in keywords
         }
 
-    def run(self, initial_prompt: str = None) -> None:
+    def run(self, initial_prompt: str | None = None) -> None:
         """
         Main loop to run REPL. CTRL+C to cancel current completion and CTRL+D to quit.
         """
@@ -67,15 +76,11 @@ class REPL:
         while True:
             try:
                 if (user_input := initial_prompt) is None:
-                    style = MULTILINE_PROMPT_STYLE if self.multiline else PROMPT_STYLE
-                    user_input = self.session.prompt(
-                        PROMPT_LEAD, style=style,
-                        multiline=self.multiline,
-                        prompt_continuation=self.left_indent,
-                    ).strip()
+                    self.console.print(PROMPT_LEAD, end='')
+                    user_input = input().strip()
                     if not user_input:
                         continue  # prevent API error
-                disable_input()
+                self.stdin_settings = disable_input()
                 cleaned_input = user_input.lower()
                 prompt_the_llm = partial(self.prompt_llm, user_input)
                 self.special_case_functions.get(cleaned_input, prompt_the_llm)()
@@ -86,11 +91,10 @@ class REPL:
                 self.exit_program()
             finally:
                 initial_prompt = None
-                reenable_input()
+                reenable_input(self.stdin_settings)
         # fmt: on
 
     def prompt_llm(self, user_input: str) -> None:
-
         # adjust printing if user has resized their terminal
         self.console.width = get_term_width()
         try:
@@ -102,7 +106,6 @@ class REPL:
             return
 
         self.print_cost()
-        self.multiline = False
 
     def clear_history(self) -> None:
         """add to the running total the price of the current chat thread and reset model state"""
@@ -119,9 +122,9 @@ class REPL:
         if cost >= 1.0:
             return f"${cost:.2f}"
         elif cost < 0.0005:
-            return f"less than \u2152 \u00A2"
+            return "less than \u2152 \u00a2"
         else:
-            return f"{cost * 100:.1f}\u00A2"
+            return f"{cost * 100:.1f}\u00a2"
 
     def print_cost(self) -> None:
         if (cost := self.model.get_cost_of_current_chat()) < 0.01:
@@ -176,6 +179,6 @@ class REPL:
             for text in self.model.prompt_and_stream_completion(prompt):
                 output += text
             print(output, flush=True)
-        except:
+        except Exception as _:
             exit(2)
         exit(0)

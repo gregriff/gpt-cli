@@ -1,13 +1,13 @@
-from abc import abstractmethod, ABC
-from typing import Generator, Callable
-from typing_extensions import override
+from abc import ABC, abstractmethod
+from typing import Callable, Generator
 
 from anthropic import Anthropic
 from anthropic.types import Usage
 from openai import OpenAI
 from tiktoken import encoding_for_model
+from typing_extensions import override
 
-from config import MODELS_AND_PRICES, CONFIG
+from config import CONFIG, MODELS_AND_PRICES
 
 
 class LLM(ABC):
@@ -18,7 +18,7 @@ class LLM(ABC):
         self.api_key = api_key
         self.system_message = system_message
         self.prices_per_token: Callable[[str], dict[str, float]] = (
-            lambda key: MODELS_AND_PRICES.get(key)[name]
+            lambda key: MODELS_AND_PRICES.get(key, {})[name]
         )
         self.prompt_arguments = {"max_tokens": max_tokens, "model": name}
         self.messages = []
