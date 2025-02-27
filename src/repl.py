@@ -9,6 +9,7 @@ from rich import box
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.style import Style
 from rich.text import Text
 
@@ -50,7 +51,7 @@ class REPL:
 
         self.console = Console(width=get_term_width(), theme=md_theme(text_color))
         self.console.set_window_title(self.model.model_name)
-        # Prompt.prompt_suffix = ""
+        self.stdin_settings = None
 
         self.color = Style.parse(text_color)
         self.theme = code_theme

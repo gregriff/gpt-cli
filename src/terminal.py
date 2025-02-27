@@ -2,7 +2,7 @@ from shutil import get_terminal_size
 from sys import stdin
 from termios import TCSAFLUSH, TCSANOW, tcgetattr, tcsetattr
 from tty import setcbreak
-from typing import Any
+from typing import Any, Optional
 
 # helpful ANSI escape codes
 RESET = "\033[0;0m"
@@ -22,16 +22,16 @@ def disable_input() -> list[Any]:
     something which modifies stdin (probably the Console object), we need to save settings to reenable input
     because its file descriptor changes
     """
-    old_settings = tcgetattr(fd := stdin.fileno())
+    stdin_settings = tcgetattr(fd := stdin.fileno())
     setcbreak(fd, TCSANOW)
-    return old_settings
+    return stdin_settings
 
 
 # Restore terminal settings
-def reenable_input(old_settings):
+def reenable_input(stdin_settings: Optional[list[Any]] = None) -> None:
     """enable echoing of characters and delete any queued input to the terminal"""
-    if not stdin.closed:
-        tcsetattr(stdin, TCSAFLUSH, old_settings)
+    if not stdin.closed and stdin_settings is not None:
+        tcsetattr(stdin, TCSAFLUSH, stdin_settings)
 
 
 def get_term_width() -> int:

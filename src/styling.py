@@ -1,9 +1,7 @@
 from rich.text import Text
 from rich.theme import Theme
 
-PROMPT_LEAD = Text(" ? ", style="cyan") + Text(
-    "> ", justify="left", overflow="fold", style="yellow"
-)
+PROMPT_LEAD = Text("? ", style="cyan") + Text("> ", justify="left", style="yellow")
 
 ### Decorations
 GREETING_TEXT = "gpt-cli"
