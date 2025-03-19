@@ -5,6 +5,9 @@ from typing import Callable
 
 from anthropic import AnthropicError
 from openai import OpenAIError
+from prompt_toolkit.enums import EditingMode
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.shortcuts import PromptSession
 from rich import box
 from rich.columns import Columns
 from rich.console import Console
@@ -22,6 +25,7 @@ from styling import (
     GREETING_PANEL_TEXT_STYLE,
     GREETING_TEXT,
     PROMPT_LEAD,
+    PROMPT_STYLE,
     md_theme,
 )
 from terminal import (
@@ -54,6 +58,13 @@ class REPL:
         self.theme = code_theme
         self.reasoning_mode = reasoning_mode
 
+        self.bindings = KeyBindings()
+        # example: self.bindings.add("c-n")
+        self.session = PromptSession(
+            editing_mode=EditingMode.VI, key_bindings=self.bindings
+        )
+        self.left_indent = " " * sum(len(text[1]) for text in PROMPT_LEAD)
+
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
             kw: function
@@ -72,8 +83,10 @@ class REPL:
         while True:
             try:
                 if (user_input := initial_prompt) is None:
-                    self.console.print(PROMPT_LEAD, end='')
-                    user_input = input().strip()
+                    user_input = self.session.prompt(
+                        PROMPT_LEAD, style=PROMPT_STYLE,
+                        prompt_continuation=self.left_indent,
+                    ).strip()
                     if not user_input:
                         continue  # prevent API error
                 self.stdin_settings = disable_input()

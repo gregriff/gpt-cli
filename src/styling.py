@@ -1,7 +1,13 @@
-from rich.text import Text
+from prompt_toolkit.styles import Style as ptkStyle
 from rich.theme import Theme
 
-PROMPT_LEAD = Text("? ", style="cyan") + Text("> ", justify="left", style="yellow")
+PROMPT_STYLE = ptkStyle(
+    [("primary", "ansibrightcyan"), ("secondary", "ansibrightyellow")]
+)
+PROMPT_LEAD = [
+    ("class:primary", "? "),
+    ("class:secondary", "> "),
+]
 
 ### Decorations
 GREETING_TEXT = "gpt-cli"

@@ -143,6 +143,10 @@ openai==1.64.0 \
     --hash=sha256:20f85cde9e95e9fbb416e3cb5a6d3119c0b28308afd6e3cc47bf100623dac623 \
     --hash=sha256:2861053538704d61340da56e2f176853d19f1dc5704bc306b7597155f850d57a
     # via gpt-cli (pyproject.toml)
+prompt-toolkit==3.0.50 \
+    --hash=sha256:544748f3860a2623ca5cd6d2795e7a14f3d0e1c3c9728359013f79877fc89bab \
+    --hash=sha256:9b6427eb19e479d98acff65196a307c555eb567989e6d88ebbb1b509d9779198
+    # via gpt-cli (pyproject.toml)
 pydantic==2.10.6 \
     --hash=sha256:427d664bf0b8a2b34ff5dd0f5a18df00591adcee7198fbd71981054cef37b584 \
     --hash=sha256:ca5daa827cce33de7a42be142548b0096bf05a7e7b365aebfa5f8eeec7128236
@@ -377,3 +381,7 @@ typing-extensions==4.12.2 \
     #   pydantic
     #   pydantic-core
     #   typer
+wcwidth==0.2.13 \
+    --hash=sha256:3da69048e4540d84af32131829ff948f1e022c1c6bdb8d6102117aac784f6859 \
+    --hash=sha256:72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5
+    # via prompt-toolkit

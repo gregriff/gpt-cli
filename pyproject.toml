@@ -2,7 +2,7 @@
 name = "gpt-cli"
 version = "1.1"
 requires-python = ">= 3.11"
-dependencies = ["openai", "anthropic", "typer", "rapidfuzz"]
+dependencies = ["openai", "anthropic", "typer", "rapidfuzz", "prompt-toolkit"]
 
 optional-dependencies.dev = ["ruff"]
 
