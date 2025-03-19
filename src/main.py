@@ -38,6 +38,7 @@ def validate_llm_model(value: str):
 def main(
     model: Annotated[str, Argument(callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = default_model,
     prompt: Annotated[Optional[str], Option("--prompt", "-p", help="Initial prompt. Omit for blank REPL")] = None,
+    reasoning_mode: Annotated[str, Option("--reasoning", "-r", help="Enable reasoning on supported models")] = "false",
     system_message: Annotated[str, Option("--system-message", "-s", help="Heavily influences responses from model")] = default_system_message,
     code_theme: Annotated[str, Option("--code-theme", "-t", callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
     text_color: Annotated[str, Option("--text-color", "-c", help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
@@ -54,7 +55,8 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    repl = REPL(llm, text_color.lower(), code_theme.lower())
+    reasoning = reasoning_mode.lower() in ('t', 'y', 'yes', 'true')
+    repl = REPL(llm, text_color.lower(), code_theme.lower(), reasoning)
     repl.render_greeting()
     repl.run(prompt)
 

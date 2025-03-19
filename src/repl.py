@@ -9,7 +9,6 @@ from rich import box
 from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Prompt
 from rich.style import Style
 from rich.text import Text
 
@@ -37,10 +36,7 @@ from terminal import (
 
 class REPL:
     def __init__(
-        self,
-        model: LLM,
-        text_color: str,
-        code_theme: str,
+        self, model: LLM, text_color: str, code_theme: str, reasoning_mode: bool
     ):
         self.model = model
         if not stdin.isatty():
@@ -54,7 +50,9 @@ class REPL:
         self.stdin_settings = None
 
         self.color = Style.parse(text_color)
+        self.reasoning_color = Style.parse("red")
         self.theme = code_theme
+        self.reasoning_mode = reasoning_mode
 
         # lookup table to run functions on certain prompts (if user presses enter)
         self.special_case_functions: dict[str, Callable] = {
@@ -92,13 +90,20 @@ class REPL:
                 reenable_input(self.stdin_settings)
         # fmt: on
 
-    def prompt_llm(self, user_input: str) -> None:
+    def prompt_llm(self, user_input: str, reasoning_mode: bool = False) -> None:
         # adjust printing if user has resized their terminal
         self.console.width = get_term_width()
+
         try:
-            with Output(self.console, self.color, self.theme) as output:
-                for text in self.model.prompt_and_stream_completion(user_input):
-                    output.print(text)
+            with Output(
+                self.console, self.color, self.reasoning_color, self.theme
+            ) as output:
+                with open("log.txt", "w") as file:
+                    for is_reasoning, text in self.model.prompt_and_stream_completion(
+                        user_input, self.reasoning_mode
+                    ):
+                        file.write(text)
+                        output.print(text, is_reasoning)
         except (OpenAIError, AnthropicError) as e:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return

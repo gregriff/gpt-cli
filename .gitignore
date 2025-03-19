@@ -1,5 +1,9 @@
 env.json
+old-keys.txt
 TODO.md
+
+# development lockfile
+uv.lock
 
 .idea/
 .zed/
