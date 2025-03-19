@@ -54,7 +54,7 @@ class REPL:
         self.stdin_settings = None
 
         self.color = Style.parse(text_color)
-        self.reasoning_color = Style.parse("red")
+        self.reasoning_color = Style.parse("blue")
         self.theme = code_theme
         self.reasoning_mode = reasoning_mode
 
@@ -106,17 +106,22 @@ class REPL:
     def prompt_llm(self, user_input: str, reasoning_mode: bool = False) -> None:
         # adjust printing if user has resized their terminal
         self.console.width = get_term_width()
+        currently_reasoning = self.reasoning_mode
 
         try:
             with Output(
                 self.console, self.color, self.reasoning_color, self.theme
             ) as output:
+                for is_reasoning, text in self.model.prompt_and_stream_completion(
+                    user_input, self.reasoning_mode
+                ):
+                    if currently_reasoning and not is_reasoning:
+                        currently_reasoning = False
+                        output.full_response += "\n\n---\n\n"
+                    output.print(text, is_reasoning)
+
                 with open("log.txt", "w") as file:
-                    for is_reasoning, text in self.model.prompt_and_stream_completion(
-                        user_input, self.reasoning_mode
-                    ):
-                        file.write(text)
-                        output.print(text, is_reasoning)
+                    file.write(output.full_response)
         except (OpenAIError, AnthropicError) as e:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
