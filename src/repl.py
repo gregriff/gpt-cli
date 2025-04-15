@@ -8,6 +8,7 @@ from openai import OpenAIError
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.shortcuts import PromptSession
+from prompt_toolkit.styles import Style as PromptStyle
 from rich import box
 from rich.columns import Columns
 from rich.console import Console
@@ -37,12 +38,23 @@ from terminal import (
     reenable_input,
 )
 
+bottom_toolbar_style = PromptStyle.from_dict(
+    {"bottom-toolbar": "fg:ansicyan bg:default noreverse"}
+)
+
+
+# def get_bottom_toolbar():
+# return FormattedText([("fg:ansicyan bg:default noreverse", "menu")])
+# return "menu"
+# return HTML('<style bg="transparent">menu</style>')
+
 
 class REPL:
     def __init__(
         self, model: LLM, text_color: str, code_theme: str, reasoning_mode: bool
     ):
         self.model = model
+        self.reasoning_mode = reasoning_mode
         if not stdin.isatty():
             self.one_shot_and_quit()
 
@@ -56,13 +68,15 @@ class REPL:
         self.color = Style.parse(text_color)
         self.reasoning_color = Style.parse("blue")
         self.theme = code_theme
-        self.reasoning_mode = reasoning_mode
 
         self.bindings = KeyBindings()
-        # example: self.bindings.add("c-n")
+        # self.bindings.add("c-r")(lambda _: print("test"))
         self.session = PromptSession(
-            editing_mode=EditingMode.VI, key_bindings=self.bindings
+            editing_mode=EditingMode.VI,
+            key_bindings=self.bindings,
+            # bottom_toolbar=get_bottom_toolbar(),
         )
+        # self.session.bottom_toolbar.
         self.left_indent = " " * sum(len(text[1]) for text in PROMPT_LEAD)
 
         # lookup table to run functions on certain prompts (if user presses enter)
@@ -86,6 +100,8 @@ class REPL:
                     user_input = self.session.prompt(
                         PROMPT_LEAD, style=PROMPT_STYLE,
                         prompt_continuation=self.left_indent,
+                        # bottom_toolbar=get_bottom_toolbar(),
+                        # style=bottom_toolbar_style
                     ).strip()
                     if not user_input:
                         continue  # prevent API error
@@ -119,9 +135,6 @@ class REPL:
                         currently_reasoning = False
                         output.full_response += "\n\n---\n\n"
                     output.print(text, is_reasoning)
-
-                with open("log.txt", "w") as file:
-                    file.write(output.full_response)
         except (OpenAIError, AnthropicError) as e:
             self.console.print(f"API Error: {str(e)}\n", style=ERROR_STYLE)
             return
@@ -189,8 +202,11 @@ class REPL:
         output = ""
         prompt = stdin.read().strip()
         try:
-            for text in self.model.prompt_and_stream_completion(prompt):
-                output += text
+            for is_reasoning, text in self.model.prompt_and_stream_completion(
+                prompt, reasoning=self.reasoning_mode
+            ):
+                if not is_reasoning:
+                    output += text
             print(output, flush=True)
         except Exception as _:
             exit(2)

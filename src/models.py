@@ -97,8 +97,6 @@ class AnthropicModel(LLM):
                         yield False, delta.citation.cited_text
                     else:
                         pass
-            # for text in stream.text_stream:
-            # yield text
             token_counts = stream.get_final_message().usage
             self.usage.input_tokens += token_counts.input_tokens
             self.usage.output_tokens += token_counts.output_tokens

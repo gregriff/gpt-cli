@@ -12,7 +12,7 @@ Access the most powerful LLMs from within the terminal.
 
 - Streamed responses with full Markdown rendering and [syntax highlighting](https://pygments.org/styles/)
 - Intentionally minimal UI/UX with configurable styling
-- Support for OpenAI and Anthropic chat models (reasoning coming soon)
+- Support for OpenAI and Anthropic chat models, including reasoning mode
   - Easily choose model with CLI option and API key
   - Highly extensible implementation
 - Top-class terminal integration via escape codes
@@ -89,8 +89,8 @@ The `--prompt` argument is parsed with a fuzzy finder. For instance, `llm haiku`
 Once your current conversation costs more than a cent or two, it will be shown at the end of the response so that you know how much you're spending. Total session cost will also be shown when the program exits.
 
 > Disclaimer:
-> While I do use the official OpenAI [tokenizer](https://github.com/openai/tiktoken) and an official cookbook example from that repo to calculate prices,
-> it is not something I have tested thoroughly, so there is no guarantee the prices are accurate. Anthropic provides authoritative token counts however, so those should be calculated better
+> While I do use the official OpenAI and Anthropic usage data from their API responses,
+> it is not something I have tested thoroughly, so costs are probably not accurate.
 
 For clarity, both OpenAI and Anthropic bill you on tokens per request AND response, and the entire chat history of previous prompts and responses are sent in EACH request. As long as you remember to clear your history after a few prompts you will be fine.
 
@@ -104,9 +104,9 @@ Feature requests are more than welcome, however I will probably take a while to 
 
 ##### Planned Features:
 
-- Support for reasoning models
-- Support for ollama
+- PyPI integration, with invocation controlled by UV to have a similar feel to python tools like Black
+- Support for ollama models
 - Proper unit tests for pricing
+- Better code structure
 - Add hierarchical configuration: TOML file, env vars, and CLI
-- Optimize for CPU-time. Rich's Live display is pretty expensive
 - Ensure the code-base is highly extensible
