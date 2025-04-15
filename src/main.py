@@ -1,12 +1,12 @@
-from typing import Optional, Annotated
+from typing import Annotated, Optional
 
-from rapidfuzz import process, fuzz
-from typer import Option, Typer, BadParameter, Argument
 from pygments import styles
+from rapidfuzz import fuzz, process
+from typer import Argument, BadParameter, Option, Typer
 
-from config import default_system_message, default_max_tokens, default_model
+from config import default_max_tokens, default_model, default_system_message
+from models import AnthropicModel, OpenAIModel
 from repl import REPL
-from models import OpenAIModel, AnthropicModel
 from styling import DEFAULT_CODE_THEME, DEFAULT_TEXT_COLOR
 
 app = Typer(name="gpt-cli", add_completion=False)
@@ -36,10 +36,11 @@ def validate_llm_model(value: str):
 
 @app.command()
 def main(
-    model: Annotated[Optional[str], Argument(callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = default_model,
-    prompt: Annotated[str, Option("--prompt", "-p", help="Initial prompt. Omit for blank REPL")] = None,
-    system_message: Annotated[Optional[str], Option("--system-message", "-s", help="Heavily influences responses from model")] = default_system_message,
-    code_theme: Annotated[Optional[str], Option("--code-theme", "-t", callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
+    model: Annotated[str, Argument(callback=validate_llm_model, help="OpenAI or Anthropic model to use")] = default_model,
+    prompt: Annotated[Optional[str], Option("--prompt", "-p", help="Initial prompt. Omit for blank REPL")] = None,
+    reasoning_mode: Annotated[str, Option("--reasoning", "-r", help="Enable reasoning on supported models")] = "false",
+    system_message: Annotated[str, Option("--system-message", "-s", help="Heavily influences responses from model")] = default_system_message,
+    code_theme: Annotated[str, Option("--code-theme", "-t", callback=validate_code_styles, help="Style of Markdown code blocks. Any Pygments `code_theme`")] = DEFAULT_CODE_THEME,
     text_color: Annotated[str, Option("--text-color", "-c", help="Color of plain text from responses. Most colors supported")] = DEFAULT_TEXT_COLOR,
     max_tokens: Annotated[int, Option(help="Maximum length of each response")] = default_max_tokens
 ):
@@ -54,7 +55,8 @@ def main(
     else:
         llm = AnthropicModel(**model_args)
 
-    repl = REPL(llm, text_color.lower(), code_theme.lower())
+    reasoning = reasoning_mode.lower() in ('t', 'y', 'yes', 'true')
+    repl = REPL(llm, text_color.lower(), code_theme.lower(), reasoning)
     repl.render_greeting()
     repl.run(prompt)
 

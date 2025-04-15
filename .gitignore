@@ -1,14 +1,27 @@
 env.json
-src/gpt-cli/env.json
+old-keys.txt
+TODO.md
+
+# development lockfile
+uv.lock
+
 .idea/
-.venv/
+.zed/
+.vscode
 
 */__pycache__
 __pycache__
 __pycache__/*
+.venv/
+*.egg-info
+build/
+
 geckodriver.log
 
 *.DS_Store
 .DS_Store
-.zed/
-.vscode
+
+.ruff_cache
+
+# misc dev
+calculator_example.py
