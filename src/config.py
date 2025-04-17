@@ -25,13 +25,13 @@ MODELS_AND_PRICES: dict[str, dict[str, float | bool] | dict[str, float]] = {
         "gpt-4.1": {"prompt": 2.0 / 1_000_000, "response": 8.0 / 1_000_000},
         "gpt-4.1-mini": {"prompt": 0.4 / 1_000_000, "response": 1.6 / 1_000_000},
         "gpt-4.1-nano": {"prompt": 0.1 / 1_000_000, "response": 0.4 / 1_000_000},
-        "o1": {
-            "prompt": 15.0 / 1_000_000,
-            "response": 60.0 / 1_000_000,
+        "o3": {
+            "prompt": 10.0 / 1_000_000,
+            "response": 40.0 / 1_000_000,
             "reasoning": True,
             "supports_temperature": False,
         },
-        "o3-mini": {
+        "o4-mini": {
             "prompt": 1.1 / 1_000_000,
             "response": 4.4 / 1_000_000,
             "reasoning": True,
